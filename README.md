@@ -1,5 +1,3 @@
-Of course! Here’s a **good README** template for your **Umiya Dashboard** project.  
-I’ll also suggest some extra things you can add to make it even better.
 
 ---
 
