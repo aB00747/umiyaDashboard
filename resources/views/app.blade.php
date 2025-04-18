@@ -20,3 +20,10 @@
         @inertia
     </body>
 </html>
+<script>
+    window.appConfig = {
+        apiBaseUrl: "{{ env('APP_URL') }}/api",
+        appName: "{{ config('app.name') }}",
+        // Add other variables you need
+    };
+</script>

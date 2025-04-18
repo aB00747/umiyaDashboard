@@ -3,18 +3,17 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 // import StatsCard from './StatsCard';
 
-export default function Dashboard({ auth }) {
-
+export default function Pricing({ auth }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            currentPage="dashboard"
+            currentPage="pricing"
         >
-            <Head title="Dashboard" />
+            <Head title="Pricing" />
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {/* <StatsCard /> */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">  Dashboard is here</div>
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">  HJIIIIII</div>
                     {/* Other dashboard components */}
                 </div>
             </div>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
@@ -5,20 +6,31 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+// Updated import path for AuthService
+import AuthService from '@/Services/AuthService';
 
 export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, processing, errors, reset } = useForm({
         email: '',
         password: '',
         remember: false,
     });
+    
+    const [loginError, setLoginError] = useState('');
 
-    const submit = (e) => {
+    const submit = async (e) => {
+        // console.log("data", data);
         e.preventDefault();
-
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
+        setLoginError('');
+        
+        try {
+            // Call the AuthService login method
+            await AuthService.login(data.email, data.password);
+            // If login is successful, AuthService will redirect to dashboard
+        } catch (error) {
+            setLoginError(error.message || 'Login failed. Please check your credentials.');
+            reset('password');
+        }
     };
 
     return (
@@ -28,6 +40,12 @@ export default function Login({ status, canResetPassword }) {
             {status && (
                 <div className="mb-4 text-sm font-medium text-green-600">
                     {status}
+                </div>
+            )}
+
+            {loginError && (
+                <div className="mb-4 text-sm font-medium text-red-600">
+                    {loginError}
                 </div>
             )}
 
