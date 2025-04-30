@@ -1,8 +1,15 @@
+// app.scss - Main entry point for your Sass styles
+
 // Fonts
-@import url('https://fonts.bunny.net/css?family=Nunito');
+@import url("https://fonts.bunny.net/css?family=Nunito");
 
-// Variables
-@import 'variables';
+// Variables and base styles
+@import "variables";
+@import "base";
+@import "components";
 
-// Bootstrap
-@import 'bootstrap/scss/bootstrap';
+// Component-specific styles
+@import "CustomerTable";
+
+// Bootstrap (if needed)
+// @import 'bootstrap/scss/bootstrap';

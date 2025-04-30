@@ -15,6 +15,7 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // Middleware applied to every request
         \App\Http\Middleware\SyncTokenToSession::class,
+        \App\Http\Middleware\Cors::class,
     ];
 
     /**

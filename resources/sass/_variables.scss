@@ -2,6 +2,31 @@
 $body-bg: #f8fafc;
 
 // Typography
-$font-family-sans-serif: 'Nunito', sans-serif;
+$font-family-sans-serif: "Nunito", sans-serif;
 $font-size-base: 0.9rem;
 $line-height-base: 1.6;
+
+// Color Palette
+$primary: #4f46e5; // Indigo 600
+$primary-light: #6366f1; // Indigo 500
+$primary-dark: #4338ca; // Indigo 700
+$secondary: #059669; // Emerald 600 - represents chemicals/acids
+$secondary-light: #10b981; // Emerald 500
+$secondary-dark: #047857; // Emerald 700
+$danger: #dc2626; // Red 600
+$warning: #d97706; // Amber 600
+$success: #16a34a; // Green 600
+$gray-light: #f3f4f6; // Gray 100
+$gray-medium: #9ca3af; // Gray 400
+$gray-dark: #4b5563; // Gray 600
+$text-primary: #111827; // Gray 900
+$text-secondary: #6b7280; // Gray 500
+$white: #ffffff;
+
+// Shadow variables
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);

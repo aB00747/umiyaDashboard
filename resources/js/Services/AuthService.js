@@ -74,7 +74,7 @@ class AuthService {
    */
   static async logout() {
     try {
-      await this.apiRequest(`${API_BASE_URL}/logout`, {
+      await this.apiRequest('/logout', {
         method: 'POST',
         credentials: 'include',
       });
@@ -88,13 +88,35 @@ class AuthService {
   }
 
   /**
+   * Get the full API URL by automatically adding the base URL if needed
+   * @param {string} endpoint - API endpoint path
+   * @returns {string} Full API URL
+   */
+  static getFullApiUrl(endpoint) {
+    // If the endpoint already includes the full URL, return it as is
+    if (endpoint.startsWith('http')) {
+      return endpoint;
+    }
+
+    // If the endpoint starts with a slash, append it directly to the base URL
+    if (endpoint.startsWith('/')) {
+      return `${API_BASE_URL}${endpoint}`;
+    }
+
+    // Otherwise, ensure a slash between base URL and endpoint
+    return `${API_BASE_URL}/${endpoint}`;
+  }
+
+  /**
    * Make an authenticated API request
-   * @param {string} url - API endpoint URL
+   * @param {string} endpoint - API endpoint path (can be relative or absolute)
    * @param {Object} options - Fetch options
    * @returns {Promise<Response>} Fetch response
    */
-  static async apiRequest(url, options = {}) {
+  static async apiRequest(endpoint, options = {}) {
     const token = this.getToken();
+    const url = this.getFullApiUrl(endpoint);
+    console.log("URLS", url);
 
     if (!token) {
       this.redirectToLogin();
@@ -134,12 +156,18 @@ class AuthService {
 
   /**
    * Make an authenticated request and parse JSON response
-   * @param {string} url - API endpoint
+   * @param {string} endpoint - API endpoint (relative or absolute)
    * @param {Object} options - Fetch options
    * @returns {Promise<Object>} Parsed JSON response
    */
-  static async apiRequestJSON(url, options = {}) {
-    const response = await this.apiRequest(url, options);
+  static async apiRequestJSON(endpoint, options = {}) {
+    const response = await this.apiRequest(endpoint, options);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Request failed with status ${response.status}`);
+    }
+
     return await response.json();
   }
 
@@ -151,7 +179,7 @@ class AuthService {
   static async search(query) {
     try {
       return await this.apiRequestJSON(
-        `${API_BASE_URL}/search?q=${encodeURIComponent(query)}`
+        `/search?q=${encodeURIComponent(query)}`
       );
     } catch (error) {
       console.error('Search error:', error.message);
@@ -217,7 +245,10 @@ class AuthService {
     window.location.href = '/login';
   }
 
-  // Add to AuthService.js
+  /**
+   * Check authentication status with the server
+   * @returns {Promise<boolean>} Authentication status
+   */
   static async checkAuthStatus() {
     try {
       const response = await fetch(`${APP_URL}/auth/check`, {
