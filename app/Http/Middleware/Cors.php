@@ -9,6 +9,14 @@ use Closure;
  */
 class Cors
 {
+    /**
+     * Handle an incoming request and set CORS headers.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure $next
+     * @return \Illuminate\Http\Response
+     */
+
     public function handle($request, Closure $next)
     {
         return $next($request)
