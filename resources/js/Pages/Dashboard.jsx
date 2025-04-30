@@ -1,23 +1,5 @@
-// Pages/Dashboard/Index.jsx
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
-// import StatsCard from './StatsCard';
+// Pages/Dashboard.jsx
+import Dashboard from './Dashboard/Index';
 
-export default function Dashboard({ auth }) {
-
-    return (
-        <AuthenticatedLayout
-            user={auth.user}
-            currentPage="dashboard"
-        >
-            <Head title="Dashboard" />
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    {/* <StatsCard /> */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">  Dashboard is here</div>
-                    {/* Other dashboard components */}
-                </div>
-            </div>
-        </AuthenticatedLayout>
-    );
-}
+// Simply re-export the Dashboard component
+export default Dashboard;

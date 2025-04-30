@@ -1,0 +1,208 @@
+@import "variables"; // Import variables from _variables.scss
+
+// Customer contact info component
+.customer-contact-info {
+    .contact-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: $gray-medium;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .text {
+            font-size: 0.875rem;
+            color: $text-primary;
+        }
+    }
+}
+
+// Financial info component
+.financial-info {
+    .financial-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+
+        .label {
+            display: flex;
+            align-items: center;
+
+            .icon {
+                width: 1.25rem;
+                height: 1.25rem;
+                color: $gray-medium;
+                margin-right: 0.5rem;
+            }
+
+            .text {
+                font-size: 0.875rem;
+                color: $gray-dark;
+            }
+        }
+
+        .value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: $text-primary;
+        }
+    }
+}
+
+// Interaction item component
+.interaction-item {
+    display: flex;
+    align-items: flex-start;
+
+    .icon-container {
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    .content {
+        margin-left: 0.75rem;
+        flex: 1;
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .title {
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: $text-primary;
+            }
+
+            .date {
+                font-size: 0.75rem;
+                color: $gray-medium;
+            }
+        }
+
+        .description {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: $gray-dark;
+        }
+
+        .meta {
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
+            color: $gray-medium;
+        }
+    }
+}
+
+// Document item component
+.document-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .document-info {
+        display: flex;
+        align-items: center;
+
+        .icon {
+            flex-shrink: 0;
+        }
+
+        .details {
+            margin-left: 0.75rem;
+
+            .name {
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: $text-primary;
+            }
+
+            .meta {
+                display: flex;
+                font-size: 0.75rem;
+                color: $gray-medium;
+                margin-top: 0.25rem;
+
+                .separator {
+                    margin: 0 0.25rem;
+                }
+            }
+        }
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.25rem;
+    }
+}
+
+// Product tag component
+.product-tag {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: rgba($primary, 0.1);
+    color: $primary-dark;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+// Stats card component
+.stats-card {
+    background-color: $white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: $shadow;
+    position: relative;
+    overflow: hidden;
+
+    .stats-title {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $gray-dark;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: $text-primary;
+    }
+
+    .stats-change {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+
+        &.positive {
+            color: $success;
+        }
+
+        &.negative {
+            color: $danger;
+        }
+
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.25rem;
+        }
+    }
+
+    .stats-meta {
+        font-size: 0.75rem;
+        color: $gray-medium;
+        margin-top: 0.25rem;
+    }
+}

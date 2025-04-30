@@ -1,0 +1,294 @@
+@import "variables";
+
+// Typography Styles
+.app-heading-1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text-primary;
+}
+
+.app-heading-2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $text-primary;
+}
+
+.app-heading-3 {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: $text-primary;
+}
+
+.app-text {
+    font-size: 0.875rem;
+    color: $text-secondary;
+}
+
+// Card Styles
+.app-card {
+    background-color: $white;
+    border-radius: 0.5rem;
+    box-shadow: $shadow;
+    overflow: hidden;
+
+    .app-card-header {
+        border-bottom: 1px solid $gray-light;
+        padding: 1rem 1.5rem;
+    }
+
+    .app-card-body {
+        padding: 1.5rem;
+    }
+
+    .app-card-footer {
+        background-color: $gray-light;
+        padding: 0.75rem 1rem;
+        border-top: 1px solid $gray-light;
+    }
+}
+
+// Button Styles
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: $shadow-sm;
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba($primary, 0.25);
+    }
+
+    &.btn-primary {
+        background-color: $primary;
+        color: $white;
+
+        &:hover {
+            background-color: $primary-dark;
+        }
+    }
+
+    &.btn-secondary {
+        background-color: $white;
+        border: 1px solid $gray-medium;
+        color: $text-primary;
+
+        &:hover {
+            background-color: $gray-light;
+        }
+    }
+
+    &.btn-danger {
+        background-color: rgba($danger, 0.1);
+        color: $danger;
+
+        &:hover {
+            background-color: rgba($danger, 0.2);
+        }
+    }
+}
+
+// Status Badge Styles
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    &.badge-success {
+        background-color: rgba($success, 0.1);
+        color: $success;
+    }
+
+    &.badge-danger {
+        background-color: rgba($danger, 0.1);
+        color: $danger;
+    }
+
+    &.badge-warning {
+        background-color: rgba($warning, 0.1);
+        color: $warning;
+    }
+}
+
+// Customer-specific styles
+.customer-list-item {
+    padding: 1rem;
+    cursor: pointer;
+
+    &:hover {
+        background-color: $gray-light;
+    }
+
+    &.selected {
+        background-color: rgba($primary, 0.1);
+    }
+}
+
+.customer-info-section {
+    background-color: $gray-light;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+// Tab Navigation
+.app-tabs {
+    border-bottom: 1px solid $gray-light;
+
+    .app-tab {
+        white-space: nowrap;
+        padding: 1rem 0.25rem;
+        margin: 0 2rem 0 0;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-bottom: 2px solid transparent;
+
+        &.active {
+            border-color: $primary;
+            color: $primary;
+        }
+
+        &:hover:not(.active) {
+            border-color: $gray-medium;
+            color: $gray-dark;
+        }
+    }
+}
+
+// Table Styles
+.app-table {
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    th {
+        padding: 0.75rem;
+        text-align: left;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $text-primary;
+        background-color: $gray-light;
+    }
+
+    td {
+        padding: 1rem 0.75rem;
+        font-size: 0.875rem;
+        color: $gray-dark;
+        border-bottom: 1px solid $gray-light;
+    }
+
+    tbody tr:hover {
+        background-color: rgba($gray-light, 0.5);
+    }
+}
+
+// Status Indicators
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &.green {
+        background-color: rgba($success, 0.1);
+        color: $success;
+    }
+
+    &.yellow {
+        background-color: rgba($warning, 0.1);
+        color: $warning;
+    }
+
+    &.red {
+        background-color: rgba($danger, 0.1);
+        color: $danger;
+    }
+}
+
+// List Styles
+.app-list {
+    border-top: 1px solid $gray-light;
+    border-bottom: 1px solid $gray-light;
+
+    .app-list-item {
+        padding: 1rem;
+
+        &:hover {
+            background-color: $gray-light;
+        }
+    }
+}
+
+// Info Panel Styles
+.info-panel {
+    background-color: $gray-light;
+    border-radius: 0.5rem;
+    padding: 1rem;
+
+    .info-panel-title {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $gray-dark;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        margin-bottom: 0.75rem;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Utility Styles
+.icon-text {
+    display: flex;
+    align-items: center;
+
+    .icon {
+        margin-right: 0.5rem;
+        color: $gray-medium;
+    }
+}
+
+.space-y {
+    > * + * {
+        margin-top: 0.75rem;
+    }
+}
+
+.justify-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+// Chart Container
+.chart-container {
+    background-color: $white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: $shadow;
+    margin-bottom: 1.5rem;
+
+    .chart-title {
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: $text-primary;
+        margin-bottom: 1rem;
+    }
+
+    .chart-body {
+        height: 20rem;
+    }
+}
