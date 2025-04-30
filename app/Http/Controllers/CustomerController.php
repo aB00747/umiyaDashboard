@@ -5,6 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 
+/**
+ * Controller for managing customers
+ *
+ * Handles all customer-related requests
+ *
+ * @package App\Http\Controllers
+ */
 class CustomerController extends Controller
 {
     /**
@@ -15,7 +22,6 @@ class CustomerController extends Controller
      */
     public function getAll(Request $request)
     {
-        // print_r("TTTTTTTTTTTTTTTTTTTT");exit;
         $limit = $request->input('limit', 15);
         $page = $request->input('page', 1);
         $search = $request->input('search', '');

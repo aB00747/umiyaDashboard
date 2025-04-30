@@ -5,6 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Customer
+ *
+ * This model represents a customer entity in the application.
+ * It is used for managing customer-related data and interactions.
+ */
 class Customer extends Model
 {
     use HasFactory;

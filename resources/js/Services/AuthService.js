@@ -74,7 +74,7 @@ class AuthService {
    */
   static async logout() {
     try {
-      await this.apiRequest(`/logout`, {
+      await this.apiRequest('/logout', {
         method: 'POST',
         credentials: 'include',
       });

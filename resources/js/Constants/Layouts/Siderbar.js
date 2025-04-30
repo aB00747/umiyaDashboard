@@ -8,10 +8,7 @@ import {
     Settings,
     Tag,
     Truck,
-    BarChart2,
-    Menu,
-    ChevronDown,
-    ChevronRight,
+    BarChart2
 } from "lucide-react";
 
 /**

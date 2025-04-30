@@ -2,7 +2,11 @@
 namespace App\Http\Middleware;
 
 use Closure;
-
+/**
+ * Set CORS headers for API responses.
+ *
+ * This middleware is applied to the whole API group.
+ */
 class Cors
 {
     public function handle($request, Closure $next)
