@@ -1,38 +1,38 @@
-@import "variables";
+@use "variables";
 
 // Typography Styles
 .app-heading-1 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: $text-primary;
+    color: variables.$text-primary;
 }
 
 .app-heading-2 {
     font-size: 1.25rem;
     font-weight: 700;
-    color: $text-primary;
+    color: variables.$text-primary;
 }
 
 .app-heading-3 {
     font-size: 1.125rem;
     font-weight: 500;
-    color: $text-primary;
+    color: variables.$text-primary;
 }
 
 .app-text {
     font-size: 0.875rem;
-    color: $text-secondary;
+    color: variables.$text-secondary;
 }
 
 // Card Styles
 .app-card {
-    background-color: $white;
+    background-color: variables.$white;
     border-radius: 0.5rem;
-    box-shadow: $shadow;
+    box-shadow: variables.$shadow;
     overflow: hidden;
 
     .app-card-header {
-        border-bottom: 1px solid $gray-light;
+        border-bottom: 1px solid variables.$gray-light;
         padding: 1rem 1.5rem;
     }
 
@@ -41,9 +41,9 @@
     }
 
     .app-card-footer {
-        background-color: $gray-light;
+        background-color: variables.$gray-light;
         padding: 0.75rem 1rem;
-        border-top: 1px solid $gray-light;
+        border-top: 1px solid variables.$gray-light;
     }
 }
 
@@ -56,38 +56,38 @@
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
     font-weight: 500;
-    box-shadow: $shadow-sm;
+    box-shadow: variables.$shadow-sm;
 
     &:focus {
         outline: none;
-        box-shadow: 0 0 0 2px rgba($primary, 0.25);
+        box-shadow: 0 0 0 2px rgba(variables.$primary, 0.25);
     }
 
     &.btn-primary {
-        background-color: $primary;
-        color: $white;
+        background-color: variables.$primary;
+        color: variables.$white;
 
         &:hover {
-            background-color: $primary-dark;
+            background-color: variables.$primary-dark;
         }
     }
 
     &.btn-secondary {
-        background-color: $white;
-        border: 1px solid $gray-medium;
-        color: $text-primary;
+        background-color: variables.$white;
+        border: 1px solid variables.$gray-medium;
+        color: variables.$text-primary;
 
         &:hover {
-            background-color: $gray-light;
+            background-color: variables.$gray-light;
         }
     }
 
     &.btn-danger {
-        background-color: rgba($danger, 0.1);
-        color: $danger;
+        background-color: rgba(variables.$danger, 0.1);
+        color: variables.$danger;
 
         &:hover {
-            background-color: rgba($danger, 0.2);
+            background-color: rgba(variables.$danger, 0.2);
         }
     }
 }
@@ -102,18 +102,18 @@
     font-weight: 500;
 
     &.badge-success {
-        background-color: rgba($success, 0.1);
-        color: $success;
+        background-color: rgba(variables.$success, 0.1);
+        color: variables.$success;
     }
 
     &.badge-danger {
-        background-color: rgba($danger, 0.1);
-        color: $danger;
+        background-color: rgba(variables.$danger, 0.1);
+        color: variables.$danger;
     }
 
     &.badge-warning {
-        background-color: rgba($warning, 0.1);
-        color: $warning;
+        background-color: rgba(variables.$warning, 0.1);
+        color: variables.$warning;
     }
 }
 
@@ -123,23 +123,23 @@
     cursor: pointer;
 
     &:hover {
-        background-color: $gray-light;
+        background-color: variables.$gray-light;
     }
 
     &.selected {
-        background-color: rgba($primary, 0.1);
+        background-color: rgba(variables.$primary, 0.1);
     }
 }
 
 .customer-info-section {
-    background-color: $gray-light;
+    background-color: variables.$gray-light;
     border-radius: 0.5rem;
     padding: 1rem;
 }
 
 // Tab Navigation
 .app-tabs {
-    border-bottom: 1px solid $gray-light;
+    border-bottom: 1px solid variables.$gray-light;
 
     .app-tab {
         white-space: nowrap;
@@ -150,13 +150,13 @@
         border-bottom: 2px solid transparent;
 
         &.active {
-            border-color: $primary;
-            color: $primary;
+            border-color: variables.$primary;
+            color: variables.$primary;
         }
 
         &:hover:not(.active) {
-            border-color: $gray-medium;
-            color: $gray-dark;
+            border-color: variables.$gray-medium;
+            color: variables.$gray-dark;
         }
     }
 }
@@ -172,19 +172,19 @@
         text-align: left;
         font-size: 0.875rem;
         font-weight: 600;
-        color: $text-primary;
-        background-color: $gray-light;
+        color: variables.$text-primary;
+        background-color: variables.$gray-light;
     }
 
     td {
         padding: 1rem 0.75rem;
         font-size: 0.875rem;
-        color: $gray-dark;
-        border-bottom: 1px solid $gray-light;
+        color: variables.$gray-dark;
+        border-bottom: 1px solid variables.$gray-light;
     }
 
     tbody tr:hover {
-        background-color: rgba($gray-light, 0.5);
+        background-color: rgba(variables.$gray-light, 0.5);
     }
 }
 
@@ -199,45 +199,45 @@
     font-weight: 600;
 
     &.green {
-        background-color: rgba($success, 0.1);
-        color: $success;
+        background-color: rgba(variables.$success, 0.1);
+        color: variables.$success;
     }
 
     &.yellow {
-        background-color: rgba($warning, 0.1);
-        color: $warning;
+        background-color: rgba(variables.$warning, 0.1);
+        color: variables.$warning;
     }
 
     &.red {
-        background-color: rgba($danger, 0.1);
-        color: $danger;
+        background-color: rgba(variables.$danger, 0.1);
+        color: variables.$danger;
     }
 }
 
 // List Styles
 .app-list {
-    border-top: 1px solid $gray-light;
-    border-bottom: 1px solid $gray-light;
+    border-top: 1px solid variables.$gray-light;
+    border-bottom: 1px solid variables.$gray-light;
 
     .app-list-item {
         padding: 1rem;
 
         &:hover {
-            background-color: $gray-light;
+            background-color: variables.$gray-light;
         }
     }
 }
 
 // Info Panel Styles
 .info-panel {
-    background-color: $gray-light;
+    background-color: variables.$gray-light;
     border-radius: 0.5rem;
     padding: 1rem;
 
     .info-panel-title {
         font-size: 0.875rem;
         font-weight: 500;
-        color: $gray-dark;
+        color: variables.$gray-dark;
         margin-bottom: 1rem;
     }
 
@@ -257,7 +257,7 @@
 
     .icon {
         margin-right: 0.5rem;
-        color: $gray-medium;
+        color: variables.$gray-medium;
     }
 }
 
@@ -275,16 +275,16 @@
 
 // Chart Container
 .chart-container {
-    background-color: $white;
+    background-color: variables.$white;
     padding: 1.5rem;
     border-radius: 0.5rem;
-    box-shadow: $shadow;
+    box-shadow: variables.$shadow;
     margin-bottom: 1.5rem;
 
     .chart-title {
         font-size: 1.125rem;
         font-weight: 500;
-        color: $text-primary;
+        color: variables.$text-primary;
         margin-bottom: 1rem;
     }
 
