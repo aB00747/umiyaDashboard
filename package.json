@@ -27,7 +27,7 @@
     "dependencies": {
         "@heroicons/react": "^2.2.0",
         "lucide-react": "^0.492.0",
-        "react-router-dom": "^7.5.0",
+        "react-router-dom": "^7.6.0",
         "recharts": "^2.15.3"
     }
 }
