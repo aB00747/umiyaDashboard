@@ -193,6 +193,74 @@ class CustomerAPI {
             throw error;
         }
     }
+
+    //     /**
+    //  * Download customer import template in specified format
+    //  * 
+    //  * @param {string} format - Format of template (xlsx or csv)
+    //  * @returns {Promise<void>} Opens template download in new window
+    //  * @throws {Error} If there is an error during the API request
+    //  */
+    //     static downloadTemplate(format = 'xlsx') {
+    //         try {
+    //             // Get the API base URL from the current location
+    //             const baseUrl = window.location.origin;
+
+    //             // Construct the template URL with format parameter
+    //             const url = `${baseUrl}/api/customers/export/template?format=${format}`;
+
+    //             // Open the download in a new window
+    //             window.open(url, '_blank');
+
+    //             return { success: true };
+    //         } catch (error) {
+    //             console.error('Error downloading template:', error);
+    //             throw error;
+    //         }
+    //     }
+
+    /**
+     * Download customer import template
+     * 
+     * @returns {Promise<void>} Opens template download in new window
+     */
+    static downloadTemplate() {
+        try {
+            // Get the base URL
+            const baseUrl = window.location.origin;
+            const url = `${baseUrl}/api/customers/export/template`;
+
+            // Open in new window to trigger download
+            // window.open(url, '_blank');
+            window.open(url);
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error downloading template:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Import customers from CSV file
+     * @param {File} file - CSV file to import
+     * @returns {Promise<Object>} Import results
+     */
+    static async importCustomers(file) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            return await AuthService.apiRequest(`${this.endpoint}/import`, {
+                method: 'POST',
+                body: formData,
+                // Don't set Content-Type header as FormData will set it with boundary
+            }).then(response => response.json());
+        } catch (error) {
+            console.error('Error importing customers:', error);
+            throw error;
+        }
+    }
 }
 
 export default CustomerAPI;

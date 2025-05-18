@@ -40,5 +40,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/{id}', [CustomerController::class, 'update']);
         Route::delete('/{id}', [CustomerController::class, 'delete']);
         Route::get('/search', [CustomerController::class, 'search']);
+
+        // File import & export API
+        Route::post('/import', [CustomerController::class, 'import']);
+        Route::get('/import/template', [CustomerController::class, 'downloadTemplate']);
+
+        // Template download
+        Route::get('/export/template', [CustomerController::class, 'downloadTemplate']);
     });
 });

@@ -9,6 +9,16 @@ import CustomerFilters from "./Components/CustomerFilters";
 import CustomerTable from "./Components/CustomerTable";
 import CustomerAPI from "@/Services/CustomerAPI";
 
+/**
+ * Customers page component
+ *
+ * Handles customer data display, filtering, sorting, and view switching
+ *
+ * @param {object} auth - Authenticated user data
+ * @param {array} customers - List of customer objects
+ *
+ * @returns {JSX.Element} Customers page component
+ */
 export default function Customers({ auth, customers }) {
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [filters, setFilters] = useState({
@@ -22,10 +32,6 @@ export default function Customers({ auth, customers }) {
     let customersz = CustomerAPI.getAll(filters);
 
     console.log("customersz", customersz);
-
-
-
-
 
     const [activeView, setActiveView] = useState("info"); // 'info' or 'table'
 
