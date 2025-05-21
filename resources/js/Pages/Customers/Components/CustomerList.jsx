@@ -6,8 +6,21 @@ import {
     XMarkIcon
 } from "@heroicons/react/24/outline";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
-import CustomerDialog from "./../Dialog/CustomerDialog";
+import CustomerDialog from "../Dialog/CustomerDialog";
 
+/**
+ * CustomerList component
+ *
+ * This component renders a list of customers with a button to add a new customer
+ * and a button to export the list of customers. It also renders a modal dialog
+ * for adding a new customer.
+ *
+ * @param {array} customers - The list of customers to display
+ * @param {string} selectedCustomer - The id of the currently selected customer
+ * @param {function} setSelectedCustomer - Function to call when the selected customer changes
+ * @param {function} onAddCustomer - Function to call when a new customer is added
+ * @returns {JSX.Element} The component
+ */
 export default function CustomerList({
     customers,
     selectedCustomer,
@@ -17,12 +30,30 @@ export default function CustomerList({
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     const [newCustomer, setNewCustomer] = useState({
-        name: "",
+        id: "",
+        firstName: "",
+        lastName: "",
+        companyName: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        stateCode: "",
+        country: "",
+        countryCode: "",
+        pinCode: "",
         phone: "",
-        category: "Individual",
-        status: "Active",
-        lastOrder: new Date().toISOString()
+        alternatePhone: "",
+        email: "",
+        gstin: "",
+        pan: "",
+        customerType: "Individual",
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
     });
+
+    console.log("newCustomer", newCustomer);
 
     return (
         <div className="bg-white shadow rounded-lg overflow-hidden">

@@ -8,6 +8,14 @@ import InventoryStatus from './Components/InventoryStatus';
 import RecentOrders from './Components/RecentOrders';
 import QualityMetrics from './Components/QualityMetrics';
 
+/**
+ * Umiya Acid & Chemical Dashboard
+ *
+ * Displays key metrics, production trends, recent orders, revenue, quality metrics, and inventory status.
+ *
+ * @param {object} auth - Authenticated user data
+ * @returns {JSX.Element} Dashboard page component
+ */
 export default function Dashboard({ auth }) {
     return (
         <AuthenticatedLayout
