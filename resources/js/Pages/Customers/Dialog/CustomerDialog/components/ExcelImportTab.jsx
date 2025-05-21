@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { TableCellsIcon } from "@heroicons/react/24/outline";
-import CustomerAPI from "../../../../../Services/CustomerAPI";
+import CustomerAPI from "@/Services/api/CustomerAPI";
 
 /**
  * ExcelImportTab
@@ -16,7 +16,7 @@ export default function ExcelImportTab({ handleExcelUpload, isLoading }) {
     const fileInputRef = useRef(null);
 
     // Function to download the template
-    const handleDownloadTemplate = (format = 'xlsx') => {
+    const handleDownloadTemplate = (format = "xlsx") => {
         CustomerAPI.downloadTemplate(format);
     };
 
@@ -43,12 +43,16 @@ export default function ExcelImportTab({ handleExcelUpload, isLoading }) {
                     Import Customer Data from Excel
                 </h3>
                 <p className="customer-dialog-import-description">
-                    Upload an Excel file (.xlsx, .xls) or CSV file containing customer information.
+                    Upload an Excel file (.xlsx, .xls) or CSV file containing
+                    customer information.
                 </p>
-                
+
                 {/* File upload section */}
                 <div className="customer-dialog-import-upload-area">
-                    <label htmlFor="excel-file-upload" className="block text-sm font-medium text-gray-700 sr-only">
+                    <label
+                        htmlFor="excel-file-upload"
+                        className="block text-sm font-medium text-gray-700 sr-only"
+                    >
                         Choose Excel file
                     </label>
                     <div className="customer-dialog-import-upload-area-container">
@@ -56,12 +60,23 @@ export default function ExcelImportTab({ handleExcelUpload, isLoading }) {
                             {selectedFile ? (
                                 <div className="selected-file">
                                     <div className="file-info">
-                                        <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        <svg
+                                            className="h-5 w-5 text-green-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M5 13l4 4L19 7"
+                                            />
                                         </svg>
                                         <span>{selectedFile.name}</span>
                                     </div>
-                                    <button 
+                                    <button
                                         type="button"
                                         className="text-red-600 hover:text-red-800"
                                         onClick={() => setSelectedFile(null)}
@@ -116,41 +131,61 @@ export default function ExcelImportTab({ handleExcelUpload, isLoading }) {
 
                 {/* Template download section */}
                 <div className="mt-4">
-                    <p className="text-sm font-medium text-gray-700">Need a template?</p>
+                    <p className="text-sm font-medium text-gray-700">
+                        Need a template?
+                    </p>
                     <div className="flex space-x-4 mt-2">
                         <button
                             type="button"
                             className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                            onClick={() => handleDownloadTemplate('xlsx')}
+                            onClick={() => handleDownloadTemplate("xlsx")}
                         >
                             Download Excel Template
                         </button>
                         <button
                             type="button"
                             className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                            onClick={() => handleDownloadTemplate('csv')}
+                            onClick={() => handleDownloadTemplate("csv")}
                         >
                             Download CSV Template
                         </button>
                     </div>
                 </div>
-                
+
                 {/* Process button - only show if file is selected */}
                 {selectedFile && (
                     <div className="mt-4">
                         <button
                             type="button"
                             className={`w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${
-                                isLoading ? "bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"
+                                isLoading
+                                    ? "bg-indigo-400"
+                                    : "bg-indigo-600 hover:bg-indigo-700"
                             }`}
                             onClick={handleProcessFile}
                             disabled={isLoading}
                         >
                             {isLoading ? (
                                 <span className="flex items-center">
-                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <svg
+                                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        ></circle>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
                                     </svg>
                                     Processing...
                                 </span>

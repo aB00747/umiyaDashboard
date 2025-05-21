@@ -7,7 +7,7 @@ import ExcelImportTab from "./components/ExcelImportTab";
 import PdfImportTab from "./components/PdfImportTab";
 import DialogFooter from "./components/DialogFooter";
 
-import CustomerAPI from "@/Services/CustomerAPI";
+import CustomerAPI from "@/Services/api/CustomerAPI";
 
 /**
  * CustomerDialog is a modal dialog for adding new customers to the database.

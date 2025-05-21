@@ -7,7 +7,7 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 // Updated import path for AuthService
-import AuthService from '@/Services/AuthService';
+import AuthService from '@/Services/auth/AuthService';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, processing, errors, reset } = useForm({

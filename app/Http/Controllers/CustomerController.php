@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomersExport;
 use App\Imports\CustomersImport;
 use App\Imports\SimpleCustomerImport;
+use Illuminate\Support\Facades\Response;
 
 /**
  * Controller for managing customers

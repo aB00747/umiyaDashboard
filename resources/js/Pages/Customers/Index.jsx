@@ -7,7 +7,7 @@ import CustomerDetails from "./Components/CustomerDetails";
 import CustomerStatistics from "./Components/CustomerStatistics";
 import CustomerFilters from "./Components/CustomerFilters";
 import CustomerTable from "./Components/CustomerTable";
-import CustomerAPI from "@/Services/CustomerAPI";
+import CustomerAPI from "@/Services/api/CustomerAPI";
 
 /**
  * Customers page component
