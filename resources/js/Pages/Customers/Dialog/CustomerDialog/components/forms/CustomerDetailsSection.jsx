@@ -1,15 +1,32 @@
 import React from "react";
+import FormField from "../FormField";
 
 /**
  * Renders a section for customer details, consisting of a select field for customer type and a checkbox for
  * active/inactive status.
- * 
+ *
  * @param {Object} props
  * @param {Object} props.newCustomer - The customer object containing details to populate the form fields.
  * @param {Function} props.handleInputChange - Handler for input change events to update customer data.
  * @param {Function} props.handleCheckboxChange - Handler for checkbox change events to update customer status.
  */
-export default function CustomerDetailsSection( { newCustomer, handleInputChange, handleCheckboxChange } ) {
+export default function CustomerDetailsSection({
+    newCustomer,
+    handleInputChange,
+    handleCheckboxChange,
+    validation,
+}) {
+    const handleFieldChange = (e) => {
+        const { name, value } = e.target;
+        handleInputChange(e);
+        validation.validateSingleField(name, value, newCustomer);
+    };
+
+    const handleFieldBlur = (e) => {
+        const { name } = e.target;
+        validation.markFieldTouched(name);
+    };
+
     return (
         <>
             {/* Customer Type and Status */}
@@ -18,26 +35,23 @@ export default function CustomerDetailsSection( { newCustomer, handleInputChange
                     Customer Details
                 </h4>
                 <div className="customer-dialog-section-grid customer-dialog-section-grid-2col">
-                    <div>
-                        <label
-                            htmlFor="customerType"
-                            className="customer-dialog-field-label"
-                        >
-                            Customer Type
-                        </label>
-                        <select
-                            id="customerType"
-                            name="customerType"
-                            value={newCustomer.customerType || "Individual"}
-                            onChange={handleInputChange}
-                            className="customer-dialog-field-input"
-                        >
+                    <FormField
+                        name="customerType"
+                        label="Customer Type"
+                        value={newCustomer.customerType}
+                        onChange={handleFieldChange}
+                        onBlur={handleFieldBlur}
+                        error={validation.getFieldError("customerType")}
+                        touched={validation.touched.customerType}
+                    >
+                        <select>
                             <option value="Individual">Individual</option>
                             <option value="Corporate">Corporate</option>
                             <option value="Retailer">Retailer</option>
                             <option value="Distributor">Distributor</option>
                         </select>
-                    </div>
+                    </FormField>
+
                     <div className="flex items-center mt-8">
                         <input
                             id="isActive"

@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import {
-    CUSTOMER_DIALOG,
-    CUSTOMER_TYPES,
-} from "@/Constants/Business/customers";
-import { useFormValidation } from "./hooks/useFormValidation";
-import {
-    CustomerValidationSchema,
-    CustomValidations,
-} from "./utils/validation";
-
-// Import the notification utility
-import { notifications, showNotification } from "@/utils/notifications";
+import { CUSTOMER_DIALOG, CUSTOMER_TYPES } from '@/Constants/Business/customers';
 
 import DialgoHeader from "./components/DialogHeader";
 import TabNavigation from "./components/TabNavigation";
@@ -61,12 +50,6 @@ export default function CustomerDialog({
     const [undoTimeLeft, setUndoTimeLeft] = useState(5);
     const [undoTimerId, setUndoTimerId] = useState(null);
 
-    const validation = useFormValidation(CustomerValidationSchema, [
-        CustomValidations.validateCustomerName,
-        CustomValidations.validateBusinessFields,
-    ]);
-
-    console.log("validation", validation);
 
     // Initialize with all fields from the database schema
     const initializeCustomer = () => ({
@@ -99,17 +82,11 @@ export default function CustomerDialog({
         setPreviousCustomerState({ ...newCustomer });
 
         // Clear the form
-        const emptyCustomer = initializeCustomer();
-        setNewCustomer(emptyCustomer);
-        validation.clearAllErrors();
-        setError(null);
+        setNewCustomer(initializeCustomer());
 
         // Show undo timer
         setShowUndoTimer(true);
         setUndoTimeLeft(5);
-
-        // Show info notification
-        notifications.info("Form cleared. Undo available for 5 seconds.");
 
         // Start countdown timer
         const timerId = setInterval(() => {
@@ -131,8 +108,6 @@ export default function CustomerDialog({
         if (previousCustomerState) {
             setNewCustomer(previousCustomerState);
             setPreviousCustomerState(null);
-            validation.clearAllErrors();
-            notifications.success("Form restored successfully!");
         }
 
         if (undoTimerId) {
@@ -170,7 +145,6 @@ export default function CustomerDialog({
     // Reset customer function
     const resetCustomer = () => {
         setNewCustomer(initializeCustomer());
-        validation.clearAllErrors();
     };
 
     const handleInputChange = (e) => {
@@ -189,35 +163,37 @@ export default function CustomerDialog({
         }));
     };
 
+    const validateCustomerData = (customer) => {
+        // Basic validation for required fields
+        if (!customer.firstName && !customer.companyName) {
+            setError(MESSAGES_ERRORS.ERROR_VALIDATION);
+            return false;
+        }
+        if (!customer.phone) {
+            setError("Phone number is required");
+            return false;
+        }
+        return true;
+    };
+
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         setError(null);
-
-        // Mark all fields as touched to show validation errors
-        Object.keys(CustomerValidationSchema).forEach((field) => {
-            validation.markFieldTouched(field);
-        });
-
-        // Validate all fields
-        const validationErrors = validation.validateAllFields(newCustomer);
-
-        console.log("handleSubmit validationErrors", validationErrors);
-
-        if (Object.keys(validationErrors).length > 0) {
-            setError("Please fix the validation errors below");
-            notifications.error(
-                "Please fix the validation errors before submitting"
-            );
-            return;
-        }
-
-        const loadingToast = notifications.loading(
-            newCustomer.id ? "Updating customer..." : "Creating customer..."
-        );
 
         try {
             setIsLoading(true);
+
+            console.log("activeTab:", activeTab);
+
+            if (!newCustomer.firstName && !newCustomer.companyName ) {
+                setError(MESSAGES_ERRORS.ERROR_VALIDATION);
+                setIsLoading(false);
+                return;
+            }
+
+            validateCustomerData(newCustomer);
 
             const customerData = {
                 first_name: newCustomer.firstName,
@@ -245,33 +221,28 @@ export default function CustomerDialog({
                 // Update existing customer
                 result = await CustomerAPI.update(newCustomer.id, customerData);
 
-                // Dismiss loading toast and show success
-                notifications.dismiss(loadingToast);
-                notifications.apiSuccess("update", "Customer");
+                // Notify user of success
+                showNotification(CUSTOMER_DIALOG.SUCCESS_UPDATE, "success");
             } else {
                 // Create new customer
                 result = await CustomerAPI.create(customerData);
 
                 // Notify user of success
-                notifications.dismiss(loadingToast);
-                notifications.apiSuccess("create", "Customer");
+                showNotification(CUSTOMER_DIALOG.SUCCESS_CREATE, "success");
             }
 
+            // Call the parent component's onAddCustomer function with the response data
+            // if (onAddCustomer) {
+            //     onAddCustomer(result);
+            // }
+
+            // Reset form and close modal
             resetCustomer();
             setIsModalOpen(false);
         } catch (error) {
             console.error("Error saving customer:", error);
-
-            // Dismiss loading toast and show error
-            notifications.dismiss(loadingToast);
-
-            const action = newCustomer.id ? "update" : "create";
-            notifications.apiError(action, error, "Customer");
-
             setError(
-                CUSTOMER_DIALOG.ERROR_SAVE +
-                    ": " +
-                    (error.message || "Unknown error")
+                CUSTOMER_DIALOG.ERROR_SAVE + ": " + (error.message || "Unknown error")
             );
         } finally {
             setIsLoading(false);
@@ -285,46 +256,23 @@ export default function CustomerDialog({
         
         setIsLoading(true);
         setError(null);
-
-        const loadingToast = notifications.loading(
-            "Importing customers from Excel..."
-        );
-
+        
         try {
             // Use the CustomerAPI import function
             const result = await CustomerAPI.importCustomers(file);
-
-            notifications.dismiss(loadingToast);
-
-            const importedCount = result.imported || 0;
-            notifications.success(
-                `Successfully imported ${importedCount} customer${
-                    importedCount !== 1 ? "s" : ""
-                }!`,
-                { duration: 5000 }
-            );
-
+            
+            // Show success message
+            showNotification(`Successfully imported ${result.imported || 0} customers`, "success");
+            
             // Close the dialog and refresh
             if (onAddCustomer) {
-                onAddCustomer({
-                    action: "import",
-                    count: result.imported || 0,
-                });
+                onAddCustomer({ action: 'import', count: result.imported || 0 });
             }
             
             setIsModalOpen(false);
         } catch (error) {
             console.error("Error importing customers" + ":", error);
-
-            // Dismiss loading toast and show error
-            notifications.dismiss(loadingToast);
-            notifications.apiError("import", error, "Customers");
-
-            setError(
-                CUSTOMER_DIALOG.ERROR_IMPORT +
-                    ": " +
-                    (error.message || "Unknown error")
-            );
+            setError(CUSTOMER_DIALOG.ERROR_IMPORT + ": " + (error.message || "Unknown error"));
         } finally {
             setIsLoading(false);
         }
@@ -334,22 +282,12 @@ export default function CustomerDialog({
     const handlePdfUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
+        
         setError(CUSTOMER_DIALOG.ERROR_PDF_NOT_IMPLEMENTED);
-
-        notifications.warning("PDF import functionality is not yet available", {
-            duration: 4000,
-        });
-
+        
         // Logic for processing PDF would go here
         console.log("PDF file uploaded:", file);
     };
-
-    // Show validation summary if there are errors
-    const hasValidationErrors = Object.keys(validation.errors).some(
-        (key) => validation.errors[key]
-    );
-    const touchedFields = Object.keys(validation.touched).length > 0;
 
     return (
         <div className="customer-dialog-overlay">
@@ -364,31 +302,12 @@ export default function CustomerDialog({
                 />
 
                 <div className="customer-dialog-content">
-                    {/* Validation Summary */}
-                    {hasValidationErrors && touchedFields && (
-                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                            <h5 className="text-red-800 font-medium mb-2">
-                                Please fix the following errors:
-                            </h5>
-                            <ul className="text-red-700 text-sm space-y-1">
-                                {Object.entries(validation.errors)
-                                    .filter(([field, error]) => error) // Only show actual errors
-                                    .map(([field, error]) => (
-                                        <li key={field}>• {error}</li>
-                                    ))}
-                            </ul>
-                        </div>
-                    )}
-
                     {/* Error message display */}
-                    {!hasValidationErrors && !touchedFields && submitError && (
-                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                            <h5 className="text-red-800 font-medium mb-2">
-                                {submitError}
-                            </h5>
+                    {submitError && (
+                        <div className="error-message text-red-700">
+                            {submitError}
                         </div>
                     )}
-
                     {/* Manual Entry Tab */}
                     {activeTab === TAB_TYPES.MANUAL && (
                         <ManualEntryForm
@@ -396,7 +315,7 @@ export default function CustomerDialog({
                             handleInputChange={handleInputChange}
                             handleCheckboxChange={handleCheckboxChange}
                             handleSubmit={handleSubmit}
-                            validation={validation}
+                            error={submitError}
                         />
                     )}
 
@@ -422,7 +341,7 @@ export default function CustomerDialog({
                         undoTimeLeft,
                         setIsModalOpen,
                         isLoading,
-                        isFormValid: validation.isValid,
+                        submitError,
                     }}
                 />
             </div>

@@ -323,58 +323,34 @@ class CustomerController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
-    // public function downloadTemplate(Request $request)
-    // {
-    //     $format = $request->query('format', 'xlsx');
-
-    //     if ($format === 'csv') {
-    //         $headers = [
-    //             'First Name',
-    //             'Last Name',
-    //             'Company Name',
-    //             'Address Line 1',
-    //             'Address Line 2',
-    //             'City',
-    //             'State',
-    //             'State Code',
-    //             'Country',
-    //             'Country Code',
-    //             'PIN Code',
-    //             'Phone',
-    //             'Alternate Phone',
-    //             'Email',
-    //             'GSTIN',
-    //             'PAN',
-    //             'Customer Type',
-    //             'Is Active'
-    //         ];
-
-    //         $filename = 'customer_import_template.csv';
-    //         $callback = function () use ($headers) {
-    //             $file = fopen('php://output', 'w');
-    //             fputcsv($file, $headers);
-    //             fclose($file);
-    //         };
-
-    //         return response()->stream($callback, 200, [
-    //             'Content-Type' => 'text/csv',
-    //             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-    //         ]);
-    //     } else {
-    //         // For Excel format
-    //         return Excel::download(new CustomerTemplateExport(), 'customer_import_template.xlsx');
-    //     }
-    // }
-
-
-    public function downloadTemplate()
+    public function downloadTemplate(Request $request)
     {
-        try {
-            $importer = new SimpleCustomerImport();
-            $templatePath = $importer->generateTemplate();
+        $format = $request->input('format', 'xlsx'); // Default to xlsx if not specified
+        $importer = new SimpleCustomerImport();
+        $filename = 'customer_import_template.' . $format;
 
-            return Response::download($templatePath, 'customer_import_template.csv', [
-                'Content-Type' => 'text/csv',
+        try {
+            switch ($format) {
+                case 'xlsx':
+                case 'xls':
+                    $templatePath = $importer->generateExcelTemplate();
+                    break;
+
+                case 'pdf':
+                    $templatePath = $importer->generatePdfTemplate();
+                    break;
+
+                case 'csv':
+                    $templatePath = $importer->generateExcelTemplate();
+                    break;
+                default:
+                    $format = 'csv'; // Ensure format is set properly
+                    // $templatePath = $importer->generateCsvTemplate(); // Make sure this exists
+                    break;
+            }
+
+            return Response::download($templatePath, $filename, [
+                'Content-Type' => $this->getContentType($format),
             ])->deleteFileAfterSend(true);
         } catch (\Exception $e) {
             return response()->json([
@@ -382,5 +358,23 @@ class CustomerController extends Controller
                 'message' => 'Failed to generate template: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get the content type based on the file format
+     * 
+     * @param string $format
+     * @return string
+     */
+    
+    private function getContentType($format)
+    {
+        return match ($format) {
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'xls' => 'application/vnd.ms-excel',
+            'pdf' => 'application/pdf',
+            'csv' => 'text/csv',
+            default => 'text/csv', // Default to CSV if format is not recognized
+        };
     }
 }

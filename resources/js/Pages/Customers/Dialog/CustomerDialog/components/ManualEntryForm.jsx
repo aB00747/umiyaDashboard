@@ -22,6 +22,7 @@ export default function ManualEntryForm({
     handleInputChange,
     handleCheckboxChange,
     handleSubmit,
+    validation
 }) {
     return (
         <>
@@ -32,24 +33,28 @@ export default function ManualEntryForm({
                 <PersonalInfoSection
                     newCustomer={newCustomer}
                     handleInputChange={handleInputChange}
+                    validation={validation}
                 />
 
                 {/* Contact Information */}
                 <ContactInfoSection
                     newCustomer={newCustomer}
                     handleInputChange={handleInputChange}
+                    validation={validation}
                 />
 
                 {/* Address Information */}
                 <AddressSection
                     newCustomer={newCustomer}
                     handleInputChange={handleInputChange}
+                    validation={validation}
                 />
 
                 {/* Business Information */}
                 <BusinessInfoSection
                     newCustomer={newCustomer}
                     handleInputChange={handleInputChange}
+                    validation={validation}
                 />
 
                 {/* Customer Type and Status */}
@@ -57,6 +62,7 @@ export default function ManualEntryForm({
                     newCustomer={newCustomer}
                     handleInputChange={handleInputChange}
                     handleCheckboxChange={handleCheckboxChange}
+                    validation={validation}
                 />
             </form>
         </>

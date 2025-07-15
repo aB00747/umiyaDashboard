@@ -13,7 +13,6 @@ import { ArrowPathIcon, XCircleIcon } from "@heroicons/react/24/outline";
  * - undoTimeLeft (number): The remaining time left for the undo action in seconds.
  * - setIsModalOpen (function): Function to call to close the modal dialog.
  */
-
 export default function DialogFooter({
     handleUndo,
     handleClearForm,
@@ -23,12 +22,13 @@ export default function DialogFooter({
     undoTimeLeft,
     setIsModalOpen,
     isLoading,
-    error,
+    submitError,
+    isFormValid = true,
 }) {
+    const isSubmitDisabled = isLoading || !isFormValid;
+
     return (
         <div className="customer-dialog-footer">
-            
-
             {showUndoTimer ? (
                 <button
                     type="button"
@@ -39,14 +39,16 @@ export default function DialogFooter({
                     <span>Undo Clear ({undoTimeLeft}s)</span>
                 </button>
             ) : (
-                <button
-                    type="button"
-                    className="customer-dialog-footer-button customer-dialog-footer-button-clear"
-                    onClick={handleClearForm}
-                >
-                    <XCircleIcon className="customer-dialog-footer-button-icon" />
-                    <span>Clear Form</span>
-                </button>
+                activeTab === "manual" && (
+                    <button
+                        type="button"
+                        className="customer-dialog-footer-button customer-dialog-footer-button-clear"
+                        onClick={handleClearForm}
+                    >
+                        <XCircleIcon className="customer-dialog-footer-button-icon" />
+                        <span>Clear Form</span>
+                    </button>
+                )
             )}
 
             <div className="flex-grow"></div>
@@ -62,9 +64,20 @@ export default function DialogFooter({
             {activeTab === "manual" && (
                 <button
                     type="submit"
-                    className="customer-dialog-footer-button customer-dialog-footer-button-primary"
+                    className={`customer-dialog-footer-button customer-dialog-footer-button-primary ${
+                        isSubmitDisabled
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
+                    }`}
                     onClick={handleSubmit}
-                    disabled={isLoading}
+                    disabled={isSubmitDisabled}
+                    title={
+                        !isFormValid
+                            ? "Please fix validation errors before submitting"
+                            : isLoading
+                            ? "Saving..."
+                            : "Save Customer"
+                    }
                 >
                     {/* Save Customer */}
                     {isLoading ? (
@@ -94,19 +107,6 @@ export default function DialogFooter({
                     ) : (
                         "Save Customer"
                     )}
-                </button>
-            )}
-
-            {(activeTab === "excel" || activeTab === "pdf") && (
-                <button
-                    type="button"
-                    className="customer-dialog-footer-button customer-dialog-footer-button-primary"
-                    onClick={() => {
-                        console.log("Processing import file...");
-                        // Logic for processing the imported file
-                    }}
-                >
-                    Process Import
                 </button>
             )}
         </div>

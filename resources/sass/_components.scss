@@ -206,3 +206,31 @@
         margin-top: 0.25rem;
     }
 }
+
+.customer-dialog-field-input.border-red-500 {
+    border-color: #ef4444;
+}
+
+.customer-dialog-field-input.border-red-500:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.customer-dialog-field-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

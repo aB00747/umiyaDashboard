@@ -1,4 +1,5 @@
 import React from "react";
+import FormField from "../FormField";
 
 /**
  * Renders a section for entering customer business information, containing
@@ -11,7 +12,22 @@ import React from "react";
  * @param {Function} props.handleInputChange - Handler for input change events to
  *                                            update customer data.
  */
-export default function BusinessInfoSection( { newCustomer, handleInputChange } ) {
+export default function BusinessInfoSection({
+    newCustomer,
+    handleInputChange,
+    validation,
+}) {
+    const handleFieldChange = (e) => {
+        const { name, value } = e.target;
+        handleInputChange(e);
+        validation.validateSingleField(name, value, newCustomer);
+    };
+
+    const handleFieldBlur = (e) => {
+        const { name } = e.target;
+        validation.markFieldTouched(name);
+    };
+
     return (
         <>
             {/* Business Information */}
@@ -20,38 +36,27 @@ export default function BusinessInfoSection( { newCustomer, handleInputChange } 
                     Business Information
                 </h4>
                 <div className="customer-dialog-section-grid customer-dialog-section-grid-2col">
-                    <div>
-                        <label
-                            htmlFor="gstin"
-                            className="customer-dialog-field-label"
-                        >
-                            GSTIN
-                        </label>
-                        <input
-                            type="text"
-                            name="gstin"
-                            id="gstin"
-                            value={newCustomer.gstin || ""}
-                            onChange={handleInputChange}
-                            className="customer-dialog-field-input"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="pan"
-                            className="customer-dialog-field-label"
-                        >
-                            PAN
-                        </label>
-                        <input
-                            type="text"
-                            name="pan"
-                            id="pan"
-                            value={newCustomer.pan || ""}
-                            onChange={handleInputChange}
-                            className="customer-dialog-field-input"
-                        />
-                    </div>
+                    <FormField
+                        name="gstin"
+                        label="GSTIN"
+                        value={newCustomer.gstin}
+                        onChange={handleFieldChange}
+                        onBlur={handleFieldBlur}
+                        error={validation.getFieldError("gstin")}
+                        touched={validation.touched.gstin}
+                        placeholder="22AAAAA0000A1Z5"
+                    />
+
+                    <FormField
+                        name="pan"
+                        label="PAN"
+                        value={newCustomer.pan}
+                        onChange={handleFieldChange}
+                        onBlur={handleFieldBlur}
+                        error={validation.getFieldError("pan")}
+                        touched={validation.touched.pan}
+                        placeholder="ABCDE1234F"
+                    />
                 </div>
             </div>
         </>

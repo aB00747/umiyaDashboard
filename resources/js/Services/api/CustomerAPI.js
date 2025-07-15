@@ -72,14 +72,14 @@ class CustomerAPI extends BaseApiService {
      * Download customer import template
      * @returns {Promise<void>} Opens template download in new window
      */
-    downloadTemplate() {
+    downloadTemplate(format = 'xlsx') {
         try {
             // Get the base URL from environment variable or construct it
             const baseUrl = import.meta.env.VITE_API_BASE_URL ||
                 `${document.location.origin}/api`;
 
             // const templateUrl = `${baseUrl}${this.resourceBase}/export/template`;
-            const templateUrl = `${baseUrl}${CUSTOMERS.EXPORT_TEMPLATE}/export/template`;
+            const templateUrl = `${baseUrl}${CUSTOMERS.EXPORT_TEMPLATE}${format ? `?format=${format}` : ''}`;
 
             console.log("templateUrl", templateUrl);
 

@@ -1,4 +1,4 @@
-// Pages/Customers/Index.jsx
+// resources/js/Pages/Customers/Index.jsx
 import { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
@@ -8,6 +8,9 @@ import CustomerStatistics from "./Components/CustomerStatistics";
 import CustomerFilters from "./Components/CustomerFilters";
 import CustomerTable from "./Components/CustomerTable";
 import CustomerAPI from "@/Services/api/CustomerAPI";
+
+// Import notifications
+import { notifications } from "@/utils/notifications";
 
 /**
  * Customers page component
@@ -27,13 +30,67 @@ export default function Customers({ auth, customers }) {
         category: "all",
         sortBy: "name",
     });
-
-
-    let customersz = CustomerAPI.getAll(filters);
-
-    console.log("customersz", customersz);
-
     const [activeView, setActiveView] = useState("info"); // 'info' or 'table'
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Function to refresh customers data
+    const refreshCustomers = async () => {
+        try {
+            setIsLoading(true);
+            const customersData = await CustomerAPI.getAll(filters);
+            console.log("customersData", customersData);
+
+            // You might want to update state here or trigger a page refresh
+            // depending on how your data flow works
+        } catch (error) {
+            console.error("Error fetching customers:", error);
+            notifications.apiError("fetch", error, "Customers");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle customer operations (create, update, delete)
+    const handleCustomerOperation = async (
+        operation,
+        customerId = null,
+        customerData = null
+    ) => {
+        try {
+            setIsLoading(true);
+            let result;
+
+            switch (operation) {
+                case "delete":
+                    result = await CustomerAPI.delete(customerId);
+                    notifications.apiSuccess("delete", "Customer");
+                    break;
+                case "activate":
+                    result = await CustomerAPI.update(customerId, {
+                        is_active: true,
+                    });
+                    notifications.success("Customer activated successfully!");
+                    break;
+                case "deactivate":
+                    result = await CustomerAPI.update(customerId, {
+                        is_active: false,
+                    });
+                    notifications.success("Customer deactivated successfully!");
+                    break;
+                default:
+                    notifications.warning("Unknown operation");
+                    return;
+            }
+
+            // Refresh the customers list
+            await refreshCustomers();
+        } catch (error) {
+            console.error(`Error during ${operation}:`, error);
+            notifications.apiError(operation, error, "Customer");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Sample data for demonstration - replace with actual data from your backend
     const sampleCustomers = [
@@ -166,6 +223,49 @@ export default function Customers({ auth, customers }) {
     // Handle view switch based on sidebar navigation
     const handleViewChange = (view) => {
         setActiveView(view);
+        notifications.info(
+            `Switched to ${
+                view === "info" ? "Customer Info" : "Customer Table"
+            } view`
+        );
+    };
+
+    // Handle filter changes
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters);
+        notifications.info("Filters updated");
+    };
+
+    // Example of bulk operations
+    const handleBulkOperation = (operation, selectedIds) => {
+        const count = selectedIds.length;
+
+        switch (operation) {
+            case "delete":
+                if (
+                    confirm(
+                        `Are you sure you want to delete ${count} customer${
+                            count > 1 ? "s" : ""
+                        }?`
+                    )
+                ) {
+                    // Perform bulk delete
+                    notifications.success(
+                        `${count} customer${
+                            count > 1 ? "s" : ""
+                        } deleted successfully!`
+                    );
+                }
+                break;
+            case "export":
+                notifications.info(
+                    `Exporting ${count} customer${count > 1 ? "s" : ""}...`
+                );
+                // Perform export
+                break;
+            default:
+                notifications.warning("Unknown bulk operation");
+        }
     };
 
     return (
@@ -211,6 +311,7 @@ export default function Customers({ auth, customers }) {
                                         ? "bg-indigo-600 text-white"
                                         : "bg-white text-gray-700 hover:bg-gray-50"
                                 }`}
+                                disabled={isLoading}
                             >
                                 Customer Info
                             </button>
@@ -222,6 +323,7 @@ export default function Customers({ auth, customers }) {
                                         ? "bg-indigo-600 text-white"
                                         : "bg-white text-gray-700 hover:bg-gray-50"
                                 }`}
+                                disabled={isLoading}
                             >
                                 Customer Table
                             </button>
@@ -234,7 +336,7 @@ export default function Customers({ auth, customers }) {
                             <div className="lg:col-span-1">
                                 <CustomerFilters
                                     filters={filters}
-                                    setFilters={setFilters}
+                                    setFilters={handleFilterChange}
                                 />
                                 <div className="mt-4">
                                     <CustomerList
@@ -243,6 +345,10 @@ export default function Customers({ auth, customers }) {
                                         setSelectedCustomer={
                                             setSelectedCustomer
                                         }
+                                        onCustomerOperation={
+                                            handleCustomerOperation
+                                        }
+                                        isLoading={isLoading}
                                     />
                                 </div>
                             </div>
@@ -258,11 +364,20 @@ export default function Customers({ auth, customers }) {
                                               )
                                             : null
                                     }
+                                    onCustomerOperation={
+                                        handleCustomerOperation
+                                    }
+                                    isLoading={isLoading}
                                 />
                             </div>
                         </div>
                     ) : (
-                        <CustomerTable customers={sortedCustomers} />
+                        <CustomerTable
+                            customers={sortedCustomers}
+                            onBulkOperation={handleBulkOperation}
+                            onCustomerOperation={handleCustomerOperation}
+                            isLoading={isLoading}
+                        />
                     )}
                 </div>
             </div>

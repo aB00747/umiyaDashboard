@@ -62,4 +62,12 @@ class Customer extends Model
     {
         return trim($this->first_name . ' ' . $this->last_name);
     }
+
+    public function getFields() 
+    {
+        $customers = Customer::query()->get();
+        echo "<pre>";
+        print_r(["cusotmer", $customers]);exit;
+    }
+
 }

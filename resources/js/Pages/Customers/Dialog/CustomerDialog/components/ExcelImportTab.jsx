@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { TableCellsIcon } from "@heroicons/react/24/outline";
 import CustomerAPI from "@/Services/api/CustomerAPI";
 
@@ -14,26 +14,85 @@ import CustomerAPI from "@/Services/api/CustomerAPI";
 export default function ExcelImportTab({ handleExcelUpload, isLoading }) {
     const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
+    const acceptedFormats = ["xlsx", "xls", "csv", "pdf"];
 
-    // Function to download the template
-    const handleDownloadTemplate = (format = "xlsx") => {
+
+    /**
+     * Returns the file extension of a given filename.
+     *
+     * @param {string} filename - The filename to extract the extension from
+     * @returns {string} The file extension
+     */
+    function getFileExtension(filename) {
+        return filename.split('.').pop();
+    }
+
+    /**
+     * Handles the download of the customer import template.
+     *
+     * @param {string} format - The format of the template file. Default is "xlsx".
+     */
+    const handleDownloadTemplate = useCallback((format = "xlsx") => {
+        console.log("template API format", format);
+        
         CustomerAPI.downloadTemplate(format);
-    };
+    }, []);
 
-    // Handle file selection
-    const handleFileChange = (e) => {
+    // /**
+    //  * Handles downloading Excel template specifically.
+    //  */
+    // const handleDownloadExcelTemplate = useCallback(() => {
+    //     handleDownloadTemplate("xlsx");
+    // }, [handleDownloadTemplate]);
+
+    // /**
+    //  * Handles downloading CSV template specifically.
+    //  */
+    // const handleDownloadCsvTemplate = useCallback(() => {
+    //     handleDownloadTemplate("csv");
+    // }, [handleDownloadTemplate]);
+
+    /**
+     * Handles file input change event by extracting the first file from the event
+     * and updating the selected file state. This allows users to choose an Excel
+     * file for import.
+     *
+     * @param {Object} e - The event object from file input change.
+     */
+    const handleFileChange = useCallback((e) => {
         const file = e.target.files[0];
+
+        if (!file) return;
+
+        const fileExtension = getFileExtension(file.name);
+
+        if (!acceptedFormats.includes(fileExtension)) {
+            alert("Please upload an Excel (.xlsx) or CSV (.csv) file.");
+            return;
+        }
+
         if (file) {
             setSelectedFile(file);
         }
-    };
+    }, []);
 
-    // Process the selected file
-    const handleProcessFile = () => {
+    /**
+     * Process the selected file by calling the handleExcelUpload function.
+     * This will upload the file to the server, and the server will handle the
+     * actual import process.
+     */
+    const handleProcessFile = useCallback(() => {
         if (selectedFile) {
             handleExcelUpload({ target: { files: [selectedFile] } });
         }
-    };
+    }, [selectedFile, handleExcelUpload]);
+
+    /**
+     * Removes the currently selected file by setting it to null.
+     */
+    const handleRemoveFile = useCallback(() => {
+        setSelectedFile(null);
+    }, []);
 
     return (
         <div className="customer-dialog-import">
@@ -79,7 +138,7 @@ export default function ExcelImportTab({ handleExcelUpload, isLoading }) {
                                     <button
                                         type="button"
                                         className="text-red-600 hover:text-red-800"
-                                        onClick={() => setSelectedFile(null)}
+                                        onClick={handleRemoveFile}
                                         disabled={isLoading}
                                     >
                                         Remove
@@ -138,16 +197,27 @@ export default function ExcelImportTab({ handleExcelUpload, isLoading }) {
                         <button
                             type="button"
                             className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                            onClick={() => handleDownloadTemplate("xlsx")}
+                            onClick={() =>handleDownloadTemplate("xlsx")}
                         >
                             Download Excel Template
                         </button>
+
                         <button
                             type="button"
                             className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                            // style={{ marginLeft: "250px" }}
                             onClick={() => handleDownloadTemplate("csv")}
                         >
                             Download CSV Template
+                        </button>
+
+                        <button
+                            type="button"
+                            className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                            // style={{ marginLeft: "250px" }}
+                            onClick={() => handleDownloadTemplate("pdf")}
+                        >
+                            Download PDF Template
                         </button>
                     </div>
                 </div>
@@ -180,12 +250,12 @@ export default function ExcelImportTab({ handleExcelUpload, isLoading }) {
                                             r="10"
                                             stroke="currentColor"
                                             strokeWidth="4"
-                                        ></circle>
+                                        />
                                         <path
                                             className="opacity-75"
                                             fill="currentColor"
                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        ></path>
+                                        />
                                     </svg>
                                     Processing...
                                 </span>

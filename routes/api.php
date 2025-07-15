@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login'])->middleware(['web']);
 Route::get('/search-public', [SearchController::class, 'search']);
 
+// Public
+Route::get('/customers/export/template/', [CustomerController::class, 'downloadTemplate']);
+
 // Protected routes (authentication required)
 Route::middleware(['auth:sanctum'])->group(function () {
     // User authentication
@@ -46,6 +49,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/import/template', [CustomerController::class, 'downloadTemplate']);
 
         // Template download
-        Route::get('/export/template', [CustomerController::class, 'downloadTemplate']);
+        // Route::get('/export/template', [CustomerController::class, 'downloadTemplate']);
     });
 });

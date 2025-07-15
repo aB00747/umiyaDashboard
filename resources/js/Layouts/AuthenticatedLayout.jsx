@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
-import Header from './Header';
+import { useState, useEffect } from "react";
+// import { Toaster } from "react-hot-toast"; // Add this import
+import Sidebar from "./Sidebar";
+import Header from "./Header";
 
-export default function AuthenticatedLayout({ children, currentPage = "dashboard" }) {
+export default function AuthenticatedLayout({
+    children,
+    currentPage = "dashboard",
+}) {
     const [activeTab, setActiveTab] = useState(currentPage);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -32,6 +36,37 @@ export default function AuthenticatedLayout({ children, currentPage = "dashboard
                     {children}
                 </main>
             </div>
+
+            {/* Add Toaster component here */}
+            {/* <Toaster
+                position="top-right"
+                reverseOrder={false}
+                gutter={8}
+                containerClassName=""
+                containerStyle={{}}
+                toastOptions={{
+                    className: "",
+                    duration: 4000,
+                    style: {
+                        background: "#363636",
+                        color: "#fff",
+                    },
+                    success: {
+                        duration: 3000,
+                        style: {
+                            background: "#10b981",
+                            color: "white",
+                        },
+                    },
+                    error: {
+                        duration: 4000,
+                        style: {
+                            background: "#ef4444",
+                            color: "white",
+                        },
+                    },
+                }}
+            /> */}
         </div>
     );
 }
