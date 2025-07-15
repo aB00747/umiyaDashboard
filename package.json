@@ -22,12 +22,12 @@
         "react-dom": "^18.2.0",
         "sass": "^1.56.1",
         "tailwindcss": "^3.2.1",
-        "vite": "^6.2.5"
+        "vite": "^6.3.5"
     },
     "dependencies": {
         "@heroicons/react": "^2.2.0",
         "lucide-react": "^0.492.0",
-        "react-router-dom": "^7.5.0",
+        "react-router-dom": "^7.6.0",
         "recharts": "^2.15.3"
     }
 }
