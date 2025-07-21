@@ -26,9 +26,14 @@ class Kernel extends HttpKernel
     protected $middlewareGroups = [
         'web' => [
             // Web middleware stack
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ],
         'api' => [
             // API middleware stack
+            // ... other middleware
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
 

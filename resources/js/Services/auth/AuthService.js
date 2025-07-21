@@ -1,272 +1,209 @@
-/**
- * Authentication Service
- * Provides utilities for API authentication and requests with Laravel Sanctum
- */
+// AuthService.js
+import axios from 'axios';
 
-// Get base URL from Laravel's global window variable or fall back to a default
-const APP_URL = window.location.origin;
-const API_BASE_URL = `${APP_URL}/api`;
-
-const STORAGE_KEYS = {
-  TOKEN: 'api_token',
-  USER: 'user'
-};
-
-/**
- * AuthService - Handles authentication and API requests
- */
 class AuthService {
-  /**
-   * Authenticate user with email and password
-   * @param {string} email - User email
-   * @param {string} password - User password
-   * @returns {Promise<Object>} Authentication response with token and user data
-   */
-  static async login(email, password) {
-    try {
-      // Get CSRF token first (Laravel requires this for security)
-      const csrfResponse = await fetch(`${APP_URL}/sanctum/csrf-cookie`, {
-        method: 'GET',
-        credentials: 'include', // Important for cookies
-      });
-
-      if (!csrfResponse.ok) {
-        console.error('Failed to get CSRF token');
-      }
-
-      // Now perform login with credentials
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest', // Required for Laravel to recognize as AJAX
-        },
-        credentials: 'include', // Important for cookies
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Authentication failed');
-      }
-
-      // Store authentication data
-      this.saveAuthData(data.token, data.user);
-
-      await new Promise(resolve => setTimeout(resolve, 300));
-      // Redirect to dashboard on successful login
-      if (data.token) {
-        window.location.href = '/dashboard';
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Authentication error:', error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Log out the current user
-   * @returns {Promise<void>}
-   */
-  static async logout() {
-    try {
-      await this.apiRequest('/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-    } catch (error) {
-      console.error('Logout error:', error.message);
-    } finally {
-      // Always clear authentication data even if the API call fails
-      this.clearAuthData();
-      window.location.href = '/login';
-    }
-  }
-
-  /**
-   * Get the full API URL by automatically adding the base URL if needed
-   * @param {string} endpoint - API endpoint path
-   * @returns {string} Full API URL
-   */
-  static getFullApiUrl(endpoint) {
-    // If the endpoint already includes the full URL, return it as is
-    if (endpoint.startsWith('http')) {
-      return endpoint;
+    constructor() {
+        this.token = this.getStoredToken();
+        this.setupAxiosInterceptors();
     }
 
-    // If the endpoint starts with a slash, append it directly to the base URL
-    if (endpoint.startsWith('/')) {
-      return `${API_BASE_URL}${endpoint}`;
-    }
+    /**
+     * Login user with remember me functionality
+     * @param {string} email
+     * @param {string} password
+     * @param {boolean} remember
+     * @returns {Promise}
+     */
+    async login(email, password, remember = false) {
+        try {
+            const response = await axios.post('/api/login', {
+                email,
+                password,
+                remember,
+                device_name: this.getDeviceName(),
+            });
 
-    // Otherwise, ensure a slash between base URL and endpoint
-    return `${API_BASE_URL}/${endpoint}`;
-  }
+            const { token, user, expires_at } = response.data;
 
-  /**
-   * Make an authenticated API request
-   * @param {string} endpoint - API endpoint path (can be relative or absolute)
-   * @param {Object} options - Fetch options
-   * @returns {Promise<Response>} Fetch response
-   */
-  static async apiRequest(endpoint, options = {}) {
-    const token = this.getToken();
-    const url = this.getFullApiUrl(endpoint);
-    console.log("URLS", url);
+            // Store token based on remember preference
+            if (remember) {
+                // Store in localStorage for persistent login
+                localStorage.setItem('auth_token', token);
+                localStorage.setItem('auth_user', JSON.stringify(user));
+                localStorage.setItem('remember_me', 'true');
+                if (expires_at) {
+                    localStorage.setItem('token_expires_at', expires_at);
+                }
+                
+                // Remove from sessionStorage if exists
+                sessionStorage.removeItem('auth_token');
+                sessionStorage.removeItem('auth_user');
+            } else {
+                // Store in sessionStorage for session-only login
+                sessionStorage.setItem('auth_token', token);
+                sessionStorage.setItem('auth_user', JSON.stringify(user));
+                
+                // Remove from localStorage if exists
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('auth_user');
+                localStorage.removeItem('remember_me');
+                localStorage.removeItem('token_expires_at');
+            }
 
-    if (!token) {
-      this.redirectToLogin();
-      throw new Error('Not authenticated');
-    }
+            // Set current token
+            this.token = token;
+            this.setAuthHeader(token);
 
-    // Merge headers with authorization
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-      ...(options.headers || {})
-    };
+            // Redirect to dashboard
+            window.location.href = '/dashboard';
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        credentials: 'include', // Important for cookies
-      });
-
-      // Handle authentication errors
-      if (response.status === 401) {
-        this.handleAuthError();
-        throw new Error('Session expired');
-      }
-
-      return response;
-    } catch (error) {
-      // Handle network errors
-      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        console.error('Network error. Please check your connection.');
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Make an authenticated request and parse JSON response
-   * @param {string} endpoint - API endpoint (relative or absolute)
-   * @param {Object} options - Fetch options
-   * @returns {Promise<Object>} Parsed JSON response
-   */
-  static async apiRequestJSON(endpoint, options = {}) {
-    const response = await this.apiRequest(endpoint, options);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Request failed with status ${response.status}`);
-    }
-
-    return await response.json();
-  }
-
-  /**
-   * Search API with authentication
-   * @param {string} query - Search query
-   * @returns {Promise<Object>} Search results
-   */
-  static async search(query) {
-    try {
-      return await this.apiRequestJSON(
-        `/search?q=${encodeURIComponent(query)}`
-      );
-    } catch (error) {
-      console.error('Search error:', error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Save authentication data to storage
-   * @param {string} token - JWT token
-   * @param {Object} user - User data
-   */
-  static saveAuthData(token, user) {
-    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-  }
-
-  /**
-   * Clear authentication data from storage
-   */
-  static clearAuthData() {
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-  }
-
-  /**
-   * Get authentication token
-   * @returns {string|null} Auth token or null if not authenticated
-   */
-  static getToken() {
-    return localStorage.getItem(STORAGE_KEYS.TOKEN);
-  }
-
-  /**
-   * Get current user data
-   * @returns {Object|null} User data or null if not authenticated
-   */
-  static getCurrentUser() {
-    const userData = localStorage.getItem(STORAGE_KEYS.USER);
-    return userData ? JSON.parse(userData) : null;
-  }
-
-  /**
-   * Check if user is authenticated
-   * @returns {boolean} Authentication status
-   */
-  static isAuthenticated() {
-    return !!this.getToken();
-  }
-
-  /**
-   * Handle authentication errors
-   */
-  static handleAuthError() {
-    this.clearAuthData();
-    this.redirectToLogin();
-  }
-
-  /**
-   * Redirect to login page
-   */
-  static redirectToLogin() {
-    window.location.href = '/login';
-  }
-
-  /**
-   * Check authentication status with the server
-   * @returns {Promise<boolean>} Authentication status
-   */
-  static async checkAuthStatus() {
-    try {
-      const response = await fetch(`${APP_URL}/auth/check`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
+            return response.data;
+        } catch (error) {
+            console.error('Login failed:', error);
+            throw new Error(
+                error.response?.data?.message || 
+                'Login failed. Please check your credentials.'
+            );
         }
-      });
-
-      const data = await response.json();
-      return data.authenticated;
-    } catch (error) {
-      console.error('Auth check error:', error);
-      return false;
     }
-  }
+
+    /**
+     * Logout user
+     */
+    async logout() {
+        try {
+            if (this.token) {
+                await axios.post('/api/logout');
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            this.clearAuth();
+            window.location.href = '/login';
+        }
+    }
+
+    /**
+     * Get stored token (check localStorage first, then sessionStorage)
+     */
+    getStoredToken() {
+        // Check localStorage first (remember me)
+        let token = localStorage.getItem('auth_token');
+        if (token) {
+            // Check if token is expired
+            const expiresAt = localStorage.getItem('token_expires_at');
+            if (expiresAt && new Date(expiresAt) <= new Date()) {
+                this.clearAuth();
+                return null;
+            }
+            return token;
+        }
+
+        // Check sessionStorage (session only)
+        return sessionStorage.getItem('auth_token');
+    }
+
+    /**
+     * Get stored user
+     */
+    getStoredUser() {
+        const userStr = localStorage.getItem('auth_user') || sessionStorage.getItem('auth_user');
+        return userStr ? JSON.parse(userStr) : null;
+    }
+
+    /**
+     * Check if user chose remember me
+     */
+    isRemembered() {
+        return localStorage.getItem('remember_me') === 'true';
+    }
+
+    /**
+     * Check if user is authenticated
+     */
+    isAuthenticated() {
+        return !!this.getStoredToken();
+    }
+
+    /**
+     * Clear all authentication data
+     */
+    clearAuth() {
+        // Clear localStorage
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('remember_me');
+        localStorage.removeItem('token_expires_at');
+        
+        // Clear sessionStorage
+        sessionStorage.removeItem('auth_token');
+        sessionStorage.removeItem('auth_user');
+        
+        // Clear current token
+        this.token = null;
+        delete axios.defaults.headers.common['Authorization'];
+    }
+
+    /**
+     * Set authorization header
+     */
+    setAuthHeader(token) {
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
+    }
+
+    /**
+     * Setup axios interceptors for automatic token handling
+     */
+    setupAxiosInterceptors() {
+        // Request interceptor to add token
+        axios.interceptors.request.use(
+            (config) => {
+                const token = this.getStoredToken();
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
+            },
+            (error) => Promise.reject(error)
+        );
+
+        // Response interceptor to handle 401 errors
+        axios.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response?.status === 401) {
+                    this.clearAuth();
+                    window.location.href = '/login';
+                }
+                return Promise.reject(error);
+            }
+        );
+    }
+
+    /**
+     * Get device name for token
+     */
+    getDeviceName() {
+        return `${navigator.platform} - ${navigator.userAgent.split(' ')[0]}`;
+    }
+
+    /**
+     * Initialize auth on app start
+     */
+    init() {
+        const token = this.getStoredToken();
+        if (token) {
+            this.setAuthHeader(token);
+        }
+    }
 }
 
-export default AuthService;
+// Create singleton instance
+const authService = new AuthService();
+
+// Initialize on import
+authService.init();
+
+export default authService;

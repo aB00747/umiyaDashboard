@@ -1,4 +1,3 @@
-// utils/validation.js
 export const ValidationRules = {
     required: (value, fieldName) => {
         if (!value || value.toString().trim() === '') {

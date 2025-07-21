@@ -21,6 +21,51 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+            'remember' => 'boolean',
+            'device_name' => 'nullable|string',
+        ]);
+
+        $credentials = $request->only('email', 'password');
+        $remember = $request->boolean('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            $user = Auth::user();
+
+            $request->session()->regenerate();
+
+            $deviceName = $request->device_name ?? $request->userAgent() ?? 'API Token';
+
+            $tokenResult = $user->createToken($deviceName);
+
+            if ($remember) {
+                // Set longer expiration for remember me (e.g., 30 days)
+                $tokenResult->accessToken->expires_at = now()->addDays(30);
+                $tokenResult->accessToken->save();
+            }
+
+            return response()->json([
+                'user' => $user,
+                'token' => $tokenResult->plainTextToken,
+                'token_type' => 'Bearer',
+                'remember' => $remember,
+                'expires_at' => $tokenResult->accessToken->expires_at,
+            ]);
+        }
+
+        throw ValidationException::withMessages([
+            'email' => ['The provided credentials are incorrect.'],
+        ]);
+    }
+
+    /**
+     * Alternative implementation with manual user lookup
+     */
+    public function loginAlternative(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'remember' => 'boolean',
             'device_name' => 'nullable|string',
         ]);
 
@@ -32,17 +77,22 @@ class AuthController extends Controller
             ]);
         }
 
-        $deviceName = $request->device_name ?? $request->userAgent() ?? 'API Token';
-        $token = $user->createToken($deviceName)->plainTextToken;
+        $remember = $request->boolean('remember');
 
-        Auth::guard('web')->login($user);
-        // Regenerate the session ID to prevent session fixation
+        // ✅ Login with remember me
+        Auth::login($user, $remember);
         $request->session()->regenerate();
+
+        $deviceName = $request->device_name ?? $request->userAgent() ?? 'API Token';
+
+        // ✅ Create token with conditional expiration
+        $token = $user->createToken($deviceName, ['*'], $remember ? now()->addDays(30) : now()->addDay());
 
         return response()->json([
             'user' => $user,
-            'token' => $token,
+            'token' => $token->plainTextToken,
             'token_type' => 'Bearer',
+            'remember' => $remember,
         ]);
     }
 
@@ -54,7 +104,20 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        if (Auth::check()) {
+            Auth::user()->remember_token = null;
+            // Auth::user()->save();
+        }
+
+        // Delete current access token
         $request->user()->currentAccessToken()->delete();
+
+        // Logout from web guard
+        Auth::guard('web')->logout();
+
+        // Invalidate session
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json(['message' => 'Successfully logged out']);
     }

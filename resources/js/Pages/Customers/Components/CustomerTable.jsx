@@ -1,4 +1,3 @@
-// Pages/Customers/Components/CustomerTable.jsx
 import { useState, useEffect } from "react";
 import { Mail, ChevronDown, Check } from "lucide-react";
 

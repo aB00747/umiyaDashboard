@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import Requiredstar from "./forms/Requiredstar";
 
 /**
@@ -38,11 +38,11 @@ const FormField = ({
         hasError ? "border-red-500 focus:border-red-500" : ""
     } ${className}`;
 
-    const handleBlur = (e) => {
+    const handleBlur = useCallback((e) => {
         if (onBlur) {
             onBlur(e);
         }
-    };
+    }, [onBlur]);
 
     return (
         <div className="relative">

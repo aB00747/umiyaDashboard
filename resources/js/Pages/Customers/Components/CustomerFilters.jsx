@@ -1,4 +1,3 @@
-// Pages/Customers/Components/CustomerFilters.jsx
 import React from "react";
 import { MagnifyingGlassIcon, FunnelIcon } from "@heroicons/react/24/outline";
 

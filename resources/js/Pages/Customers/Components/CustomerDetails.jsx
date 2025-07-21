@@ -1,4 +1,3 @@
-// Pages/Customers/Components/CustomerDetails.jsx
 import React, { useState } from "react";
 import {
     UserIcon,
