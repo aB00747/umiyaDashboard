@@ -1,5 +1,5 @@
 // resources/js/Pages/Customers/Index.jsx
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import CustomerList from "./Components/CustomerList";
@@ -8,6 +8,7 @@ import CustomerStatistics from "./Components/CustomerStatistics";
 import CustomerFilters from "./Components/CustomerFilters";
 import CustomerTable from "./Components/CustomerTable";
 import CustomerAPI from "@/Services/api/CustomerAPI";
+import RefreshButton from "./Components/RefreshButton";
 
 // Import notifications
 import { notifications } from "@/utils/notifications";
@@ -24,7 +25,7 @@ import { notifications } from "@/utils/notifications";
  */
 export default function Customers({ auth, customers }) {
     const [selectedCustomer, setSelectedCustomer] = useState(null);
-    const [filters, setFilters] = useState({
+    const [customerFilters, setFilters] = useState({
         search: "",
         status: "all",
         category: "all",
@@ -32,189 +33,154 @@ export default function Customers({ auth, customers }) {
     });
     const [activeView, setActiveView] = useState("info"); // 'info' or 'table'
     const [isLoading, setIsLoading] = useState(false);
+    const [apiCustomers, setApiCustomers] = useState(null);
+    const [hasError, setHasError] = useState(false);
 
     // Function to refresh customers data
-    const refreshCustomers = async () => {
+    const fetchCustomersData = async (filters = {}) => {
         try {
             setIsLoading(true);
-            const customersData = await CustomerAPI.getAll(filters);
-            console.log("customersData", customersData);
+            setHasError(false);
 
-            // You might want to update state here or trigger a page refresh
-            // depending on how your data flow works
+            const customersResponse = await CustomerAPI.getAll(filters);
+            console.log("Fetched customers data:", customersResponse);
+
+            // Store the fetched data in state
+            setApiCustomers(customersResponse.data || customersResponse);
         } catch (error) {
             console.error("Error fetching customers:", error);
+            setHasError(true);
             notifications.apiError("fetch", error, "Customers");
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Initial data fetch
+    useEffect(() => {
+        fetchCustomersData(customerFilters);
+    }, []);
+
+    // Refetch when filters change (with debounce for search)
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (customerFilters.search || Object.keys(customerFilters).some(key => 
+                key !== 'search' && customerFilters[key] !== (key === 'sortBy' ? 'name' : 'all')
+            )) {
+                fetchCustomersData(customerFilters);
+            }
+        }, 500); // 500ms debounce for search
+
+        return () => clearTimeout(timeoutId);
+    }, [customerFilters]);
+
     // Handle customer operations (create, update, delete)
-    const handleCustomerOperation = async (
+    const handleCustomerOperation = useCallback(async (
         operation,
         customerId = null,
         customerData = null
     ) => {
         try {
             setIsLoading(true);
-            let result;
+            let operationResult;
 
             switch (operation) {
                 case "delete":
-                    result = await CustomerAPI.delete(customerId);
+                    operationResult = await CustomerAPI.delete(customerId);
                     notifications.apiSuccess("delete", "Customer");
                     break;
                 case "activate":
-                    result = await CustomerAPI.update(customerId, {
+                    operationResult = await CustomerAPI.update(customerId, {
                         is_active: true,
                     });
                     notifications.success("Customer activated successfully!");
                     break;
                 case "deactivate":
-                    result = await CustomerAPI.update(customerId, {
+                    operationResult = await CustomerAPI.update(customerId, {
                         is_active: false,
                     });
                     notifications.success("Customer deactivated successfully!");
+                    break;
+                case "create":
+                    operationResult = await CustomerAPI.create(customerData);
+                    notifications.apiSuccess("create", "Customer");
+                    break;
+                case "update":
+                    operationResult = await CustomerAPI.update(
+                        customerId,
+                        customerData
+                    );
+                    notifications.apiSuccess("update", "Customer");
                     break;
                 default:
                     notifications.warning("Unknown operation");
                     return;
             }
 
-            // Refresh the customers list
-            await refreshCustomers();
+            // Refresh the customers list after operation
+            await fetchCustomersData(customerFilters);
         } catch (error) {
             console.error(`Error during ${operation}:`, error);
             notifications.apiError(operation, error, "Customer");
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    // Sample data for demonstration - replace with actual data from your backend
-    const sampleCustomers = [
-        {
-            id: 1,
-            name: "Reliance Industries Ltd.",
-            contactPerson: "Mukesh Shah",
-            email: "procurement@reliance.com",
-            phone: "+91 22 3456 7890",
-            address: "Maker Chambers IV, Nariman Point, Mumbai 400021",
-            category: "Corporate",
-            status: "Active",
-            creditLimit: "₹50,00,000",
-            outstanding: "₹12,45,000",
-            lastOrder: "2023-07-15",
-            joinDate: "2018-04-10",
-            orders: 145,
-            revenue: "₹2,85,75,000",
-        },
-        {
-            id: 2,
-            name: "Tata Chemicals",
-            contactPerson: "Ravi Patel",
-            email: "ravi.patel@tatachemicals.com",
-            phone: "+91 22 6665 8880",
-            address: "Bombay House, 24 Homi Mody Street, Mumbai 400001",
-            category: "Corporate",
-            status: "Active",
-            creditLimit: "₹45,00,000",
-            outstanding: "₹8,75,000",
-            lastOrder: "2023-07-10",
-            joinDate: "2017-06-12",
-            orders: 132,
-            revenue: "₹2,25,40,000",
-        },
-        {
-            id: 3,
-            name: "Hindustan Zinc Ltd",
-            contactPerson: "Anil Agarwal",
-            email: "procurement@hzl.com",
-            phone: "+91 294 660 3333",
-            address: "Yashad Bhawan, Udaipur 313004, Rajasthan",
-            category: "Corporate",
-            status: "Active",
-            creditLimit: "₹30,00,000",
-            outstanding: "₹5,45,000",
-            lastOrder: "2023-07-05",
-            joinDate: "2019-02-18",
-            orders: 78,
-            revenue: "₹1,15,60,000",
-        },
-        {
-            id: 4,
-            name: "Shree Chemicals",
-            contactPerson: "Rajesh Sharma",
-            email: "rajesh@shreechemicals.com",
-            phone: "+91 79 2658 4721",
-            address: "456 GIDC, Vatva, Ahmedabad 382445, Gujarat",
-            category: "Distributor",
-            status: "Inactive",
-            creditLimit: "₹15,00,000",
-            outstanding: "₹4,25,000",
-            lastOrder: "2023-03-20",
-            joinDate: "2020-08-05",
-            orders: 42,
-            revenue: "₹65,75,000",
-        },
-        {
-            id: 5,
-            name: "Bharat Rasayan Ltd",
-            contactPerson: "Sunil Gupta",
-            email: "sunil@bharatrasayan.com",
-            phone: "+91 11 4359 0000",
-            address: "1501, Vikrant Tower, Rajendra Place, New Delhi 110008",
-            category: "Manufacturer",
-            status: "Active",
-            creditLimit: "₹25,00,000",
-            outstanding: "₹0",
-            lastOrder: "2023-07-01",
-            joinDate: "2021-01-15",
-            orders: 35,
-            revenue: "₹85,25,000",
-        },
-    ];
-
-    // Use either actual data passed from backend or sample data
-    const displayCustomers = customers || sampleCustomers;
+    // Use API data when available, fallback to props data if needed
+    const displayCustomers = apiCustomers || customers || [];
 
     // Apply filters to customer list
     const filteredCustomers = displayCustomers.filter((customer) => {
-        // Search filter
+        // Search filter - check name and contact person
+        const searchTerm = customerFilters.search.toLowerCase();
         const matchesSearch =
-            customer.name
-                .toLowerCase()
-                .includes(filters.search.toLowerCase()) ||
-            customer.contactPerson
-                .toLowerCase()
-                .includes(filters.search.toLowerCase());
+            !searchTerm ||
+            customer.name?.toLowerCase().includes(searchTerm) ||
+            customer.contactPerson?.toLowerCase().includes(searchTerm) ||
+            customer.contact_person?.toLowerCase().includes(searchTerm); // Handle different naming conventions
 
         // Status filter
         const matchesStatus =
-            filters.status === "all" ||
-            customer.status.toLowerCase() === filters.status.toLowerCase();
+            customerFilters.status === "all" ||
+            customer.status?.toLowerCase() ===
+                customerFilters.status.toLowerCase() ||
+            (customer.is_active !== undefined
+                ? customerFilters.status === "active"
+                    ? customer.is_active
+                    : !customer.is_active
+                : true);
 
         // Category filter
         const matchesCategory =
-            filters.category === "all" ||
-            customer.category.toLowerCase() === filters.category.toLowerCase();
+            customerFilters.category === "all" ||
+            customer.category?.toLowerCase() ===
+                customerFilters.category.toLowerCase();
 
         return matchesSearch && matchesStatus && matchesCategory;
     });
 
     // Sort customers based on selected sort option
     const sortedCustomers = [...filteredCustomers].sort((a, b) => {
-        switch (filters.sortBy) {
+        switch (customerFilters.sortBy) {
             case "name":
-                return a.name.localeCompare(b.name);
+                return (a.name || "").localeCompare(b.name || "");
             case "recent":
-                return new Date(b.lastOrder) - new Date(a.lastOrder);
+                const dateA = new Date(a.lastOrder || a.last_order || 0);
+                const dateB = new Date(b.lastOrder || b.last_order || 0);
+                return dateB - dateA;
             case "revenue":
-                return (
-                    parseFloat(b.revenue.replace(/[₹,]/g, "")) -
-                    parseFloat(a.revenue.replace(/[₹,]/g, ""))
+                const revenueA = parseFloat(
+                    (a.revenue || a.total_revenue || "0")
+                        .toString()
+                        .replace(/[₹,]/g, "")
                 );
+                const revenueB = parseFloat(
+                    (b.revenue || b.total_revenue || "0")
+                        .toString()
+                        .replace(/[₹,]/g, "")
+                );
+                return revenueB - revenueA;
             default:
                 return 0;
         }
@@ -231,10 +197,10 @@ export default function Customers({ auth, customers }) {
     };
 
     // Handle filter changes
-    const handleFilterChange = (newFilters) => {
+    const handleFilterChange = useCallback((newFilters) => {
         setFilters(newFilters);
         notifications.info("Filters updated");
-    };
+    }, []);
 
     // Example of bulk operations
     const handleBulkOperation = (operation, selectedIds) => {
@@ -268,6 +234,10 @@ export default function Customers({ auth, customers }) {
         }
     };
 
+    const handleRefresh = useCallback(() => {
+        fetchCustomersData(customerFilters);
+    }, [customerFilters]);
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -297,8 +267,47 @@ export default function Customers({ auth, customers }) {
                         </p>
                     </div>
 
-                    {/* Customer Statistics Overview */}
-                    <CustomerStatistics customers={displayCustomers} />
+                    {/* Loading State for Statistics */}
+                    {isLoading && !displayCustomers.length ? (
+                        <div className="mb-6 bg-white rounded-lg shadow p-6">
+                            <div className="animate-pulse flex space-x-4">
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        /* Customer Statistics Overview */
+                        <CustomerStatistics customers={displayCustomers} />
+                    )}
+
+                    {/* Error State */}
+                    {hasError && (
+                        <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+                            <div className="flex">
+                                <div className="ml-3">
+                                    <h3 className="text-sm font-medium text-red-800">
+                                        Error Loading Customers
+                                    </h3>
+                                    <div className="mt-2 text-sm text-red-700">
+                                        <p>
+                                            Unable to load customer data. Please try refreshing the page.
+                                        </p>
+                                    </div>
+                                    <div className="mt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => fetchCustomersData(customerFilters)}
+                                            className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                                        >
+                                            Try Again
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Toggle View */}
                     <div className="mt-6 mb-4">
@@ -330,12 +339,30 @@ export default function Customers({ auth, customers }) {
                         </div>
                     </div>
 
-                    {activeView === "info" ? (
+                    {/* Content based on data availability */}
+                    {!isLoading && !hasError && displayCustomers.length === 0 ? (
+                        /* Empty State */
+                        <div className="text-center py-12">
+                            <div className="mx-auto h-12 w-12 text-gray-400">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <h3 className="mt-2 text-sm font-medium text-gray-900">No customers found</h3>
+                            <p className="mt-1 text-sm text-gray-500">
+                                Get started by adding your first customer.
+                            </p>
+                        </div>
+                    ) : activeView === "info" ? (
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                             {/* Left Column: Customer List with Filters */}
                             <div className="lg:col-span-1">
+                                <RefreshButton
+                                    handleRefresh={handleRefresh}
+                                    isLoading={isLoading}
+                                />
                                 <CustomerFilters
-                                    filters={filters}
+                                    filters={customerFilters}
                                     setFilters={handleFilterChange}
                                 />
                                 <div className="mt-4">

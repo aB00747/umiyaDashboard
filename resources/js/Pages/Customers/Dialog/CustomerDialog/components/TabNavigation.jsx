@@ -1,58 +1,59 @@
 import React from "react";
 import {
     UserIcon,
-    TableCellsIcon,
-    DocumentTextIcon,
+    CloudArrowUpIcon,
 } from "@heroicons/react/24/outline";
 
 /**
- * TabNavigation
- *
- * A navigation bar for the customer dialog tabs.
+ * Simplified TabNavigation for Manual Entry and Unified Import
  *
  * Props:
- * - activeTab (string): The currently active tab, which determines which button to highlight.
- * - setActiveTab (function): Function to call to set the active tab.
+ * - activeTab (string): The currently active tab ('manual' or 'import')
+ * - setActiveTab (function): Function to call to set the active tab
  *
  * Returns:
- * - A rendered element
+ * - A rendered navigation element with two tabs
  */
 export default function TabNavigation({ activeTab, setActiveTab }) {
+    const tabs = [
+        {
+            id: 'manual',
+            label: 'Manual Entry',
+            icon: UserIcon,
+            description: 'Add customer information manually'
+        },
+        {
+            id: 'import',
+            label: 'Import Files',
+            icon: CloudArrowUpIcon,
+            description: 'Import from Excel, CSV, or PDF files'
+        }
+    ];
+
     return (
-        <div className="customer-dialog-tabs">
-            <button
-                className={`customer-dialog-tabs-button ${
-                    activeTab === "manual"
-                        ? "customer-dialog-tabs-button-active"
-                        : "customer-dialog-tabs-button-inactive"
-                }`}
-                onClick={() => setActiveTab("manual")}
-            >
-                <UserIcon className="customer-dialog-tabs-button-icon" />
-                <span>Manual Entry</span>
-            </button>
-            <button
-                className={`customer-dialog-tabs-button ${
-                    activeTab === "excel"
-                        ? "customer-dialog-tabs-button-active"
-                        : "customer-dialog-tabs-button-inactive"
-                }`}
-                onClick={() => setActiveTab("excel")}
-            >
-                <TableCellsIcon className="customer-dialog-tabs-button-icon" />
-                <span>Import Excel</span>
-            </button>
-            <button
-                className={`customer-dialog-tabs-button ${
-                    activeTab === "pdf"
-                        ? "customer-dialog-tabs-button-active"
-                        : "customer-dialog-tabs-button-inactive"
-                }`}
-                onClick={() => setActiveTab("pdf")}
-            >
-                <DocumentTextIcon className="customer-dialog-tabs-button-icon" />
-                <span>Import PDF</span>
-            </button>
-        </div>
+        <nav className="customer-dialog-tabs" aria-label="Customer entry options">
+            {tabs.map((tab) => {
+                const IconComponent = tab.icon;
+                const isActive = activeTab === tab.id;
+                
+                return (
+                    <button
+                        key={tab.id}
+                        type="button"
+                        className={`customer-dialog-tabs-button ${
+                            isActive
+                                ? "customer-dialog-tabs-button-active"
+                                : "customer-dialog-tabs-button-inactive"
+                        }`}
+                        onClick={() => setActiveTab(tab.id)}
+                        aria-selected={isActive}
+                        title={tab.description}
+                    >
+                        <IconComponent className="customer-dialog-tabs-button-icon" />
+                        <span>{tab.label}</span>
+                    </button>
+                );
+            })}
+        </nav>
     );
 }

@@ -76,6 +76,14 @@ export const useFormValidation = (schema, customValidations = []) => {
         return newErrors;
     }, [schema, customValidations, validateField]);
 
+    const clearFieldError = useCallback((fieldName) => {
+        setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[fieldName];
+            return newErrors;
+        });
+    }, []);
+
     const validateSingleField = useCallback((fieldName, value, allData = {}) => {
         const fieldError = validateField(fieldName, value, allData);
 
@@ -90,7 +98,7 @@ export const useFormValidation = (schema, customValidations = []) => {
         }));
 
         return fieldError;
-    }, [validateField]);
+    }, [validateField, clearFieldError]);
 
     const validateAllFields = useCallback((data) => {
         console.log("data", data);
@@ -107,14 +115,6 @@ export const useFormValidation = (schema, customValidations = []) => {
             ...prev,
             [fieldName]: true
         }));
-    }, []);
-
-    const clearFieldError = useCallback((fieldName) => {
-        setErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors[fieldName];
-            return newErrors;
-        });
     }, []);
 
     const clearAllErrors = useCallback(() => {

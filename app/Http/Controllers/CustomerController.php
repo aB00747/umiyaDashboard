@@ -6,9 +6,13 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomersExport;
-use App\Imports\CustomersImport;
-use App\Imports\SimpleCustomerImport;
+use App\Imports\CustomerImport;
+use App\Services\PdfProcessor;
+use App\Services\TemplateGenerator;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Controller for managing customers
@@ -31,7 +35,35 @@ class CustomerController extends Controller
         $page = $request->input('page', 1);
         $search = $request->input('search', '');
 
-        $query = Customer::query();
+        $defaultColumns = [
+            'id',
+            'first_name',
+            'last_name',
+            'company_name',
+            'address_line1',
+            'address_line2',
+            'city',
+            'state',
+            'state_code',
+            'country',
+            'country_code',
+            'pin_code',
+            'alternate_phone',
+            'gstin',
+            'pan',
+            'email',
+            'phone',
+            'customer_type',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ];
+
+        // Allow dynamic column selection via 'fields' parameter
+        $fields = $request->input('fields');
+        $columns = $fields ? explode(',', $fields) : $defaultColumns;
+
+        $query = Customer::select($columns);
 
         // Apply search filter if provided
         if ($search) {
@@ -182,7 +214,7 @@ class CustomerController extends Controller
     }
 
     /**
-     * Import customers from Excel/CSV file
+     * Import customers from various file formats (Excel, CSV, PDF)
      * 
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -190,25 +222,54 @@ class CustomerController extends Controller
     public function import(Request $request)
     {
         // Validate the uploaded file
-        $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:10240', // 10MB max
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:xlsx,xls,csv,pdf|max:51200', // 50MB max
         ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
         $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
 
         try {
-            $importer = new SimpleCustomerImport();
-            $imported = $importer->import($file->getPathname());
+            Log::info('Starting customer import', [
+                'filename' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'type' => $extension
+            ]);
+
+            $results = match ($extension) {
+                'xlsx', 'xls' => $this->importFromExcel($file),
+                'csv' => $this->importFromCsv($file),
+                'pdf' => $this->importFromPdf($file),
+                default => throw new \Exception("Unsupported file format: {$extension}")
+            };
+
+            Log::info('Customer import completed', $results);
 
             return response()->json([
                 'success' => true,
-                'imported' => $imported,
-                'message' => "Successfully imported {$imported} customers."
+                'message' => $this->generateImportMessage($results),
+                ...$results
             ]);
+
         } catch (\Exception $e) {
+            Log::error('Customer import failed', [
+                'filename' => $file->getClientOriginalName(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to import customers: ' . $e->getMessage()
+                'message' => 'Failed to import customers: ' . $e->getMessage(),
+                'error_details' => config('app.debug') ? $e->getTraceAsString() : null
             ], 422);
         }
     }
@@ -217,164 +278,150 @@ class CustomerController extends Controller
      * Import customers from Excel file
      * 
      * @param \Illuminate\Http\UploadedFile $file
-     * @return int Number of imported customers
+     * @return array Import results
      */
-    private function importFromExcel($file)
+    private function importFromExcel($file): array
     {
-        // Install the required package: composer require maatwebsite/excel
-        $import = new CustomersImport();
+        $import = new CustomerImport();
         Excel::import($import, $file);
-
-        return $import->getRowCount();
+        return $import->getImportResults();
     }
 
     /**
      * Import customers from CSV file
      * 
      * @param \Illuminate\Http\UploadedFile $file
-     * @return int Number of imported customers
+     * @return array Import results
      */
-    private function importFromCSV($file)
+    private function importFromCsv($file): array
     {
-        $imported = 0;
-        $handle = fopen($file->getPathname(), 'r');
-
-        // Read the header row
-        $headers = fgetcsv($handle);
-        $mappedHeaders = $this->mapCSVHeaders($headers);
-
-        // Process each row
-        while (($data = fgetcsv($handle)) !== false) {
-            $customerData = [];
-
-            // Map CSV columns to database fields
-            foreach ($mappedHeaders as $index => $field) {
-                if ($field && isset($data[$index])) {
-                    $customerData[$field] = $data[$index];
-                }
-            }
-
-            // Validate required fields
-            if (empty($customerData['first_name']) && empty($customerData['company_name'])) {
-                continue; // Skip invalid rows
-            }
-
-            // Create the customer
-            try {
-                Customer::create($customerData);
-                $imported++;
-            } catch (\Exception $e) {
-                // Log error and continue
-                // \Log::error('Failed to import customer: ' . $e->getMessage(), $customerData);
-            }
-        }
-
-        fclose($handle);
-        return $imported;
+        // Convert CSV to Excel format for consistent processing
+        $import = new CustomerImport();
+        Excel::import($import, $file);
+        return $import->getImportResults();
     }
 
     /**
-     * Map CSV headers to database fields
+     * Import customers from PDF file
      * 
-     * @param array $headers
-     * @return array
+     * @param \Illuminate\Http\UploadedFile $file
+     * @return array Import results
      */
-    private function mapCSVHeaders($headers)
+    private function importFromPdf($file): array
     {
-        $mapping = [];
-        $fieldMap = [
-            'first name' => 'first_name',
-            'last name' => 'last_name',
-            'company name' => 'company_name',
-            'address line 1' => 'address_line1',
-            'address line 2' => 'address_line2',
-            'city' => 'city',
-            'state' => 'state',
-            'state code' => 'state_code',
-            'country' => 'country',
-            'country code' => 'country_code',
-            'pin code' => 'pin_code',
-            'zip code' => 'pin_code',
-            'postal code' => 'pin_code',
-            'phone' => 'phone',
-            'phone number' => 'phone',
-            'alternate phone' => 'alternate_phone',
-            'email' => 'email',
-            'email address' => 'email',
-            'gstin' => 'gstin',
-            'gst number' => 'gstin',
-            'pan' => 'pan',
-            'pan number' => 'pan',
-            'customer type' => 'customer_type',
-            'status' => 'is_active',
-        ];
-
-        foreach ($headers as $index => $header) {
-            $header = strtolower(trim($header));
-            $mapping[$index] = $fieldMap[$header] ?? null;
-        }
-
-        return $mapping;
+        $processor = new PdfProcessor();
+        return $processor->processPdfFile($file);
     }
+
 
     /**
      * Download customer import template
      * 
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
      */
     public function downloadTemplate(Request $request)
     {
-        $format = $request->input('format', 'xlsx'); // Default to xlsx if not specified
-        $importer = new SimpleCustomerImport();
-        $filename = 'customer_import_template.' . $format;
-
-        try {
-            switch ($format) {
-                case 'xlsx':
-                case 'xls':
-                    $templatePath = $importer->generateExcelTemplate();
-                    break;
-
-                case 'pdf':
-                    $templatePath = $importer->generatePdfTemplate();
-                    break;
-
-                case 'csv':
-                    $templatePath = $importer->generateExcelTemplate();
-                    break;
-                default:
-                    $format = 'csv'; // Ensure format is set properly
-                    // $templatePath = $importer->generateCsvTemplate(); // Make sure this exists
-                    break;
-            }
-
-            return Response::download($templatePath, $filename, [
-                'Content-Type' => $this->getContentType($format),
-            ])->deleteFileAfterSend(true);
-        } catch (\Exception $e) {
+        $format = strtolower($request->input('format', 'xlsx'));
+        
+        // Validate format
+        if (!in_array($format, ['xlsx', 'csv', 'pdf'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate template: ' . $e->getMessage()
+                'message' => "Unsupported format: {$format}. Supported formats: xlsx, csv, pdf"
+            ], 400);
+        }
+
+        try {
+            $generator = new TemplateGenerator();
+            $templatePath = $generator->generateTemplate($format);
+            
+            $filename = 'customer_import_template.' . $format;
+            $contentType = $generator->getContentType($format);
+
+            Log::info('Template downloaded', [
+                'format' => $format,
+                'filename' => $filename,
+                'path' => $templatePath
+            ]);
+
+            return Response::download($templatePath, $filename, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Cache-Control' => 'no-cache, must-revalidate',
+                'Expires' => '0'
+            ])->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            Log::error('Template generation failed', [
+                'format' => $format,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate template: ' . $e->getMessage(),
+                'error_details' => config('app.debug') ? $e->getTraceAsString() : null
             ], 500);
         }
     }
 
     /**
-     * Get the content type based on the file format
+     * Generate import success message
      * 
-     * @param string $format
+     * @param array $results
      * @return string
      */
-    
-    private function getContentType($format)
+    private function generateImportMessage(array $results): string
     {
-        return match ($format) {
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'xls' => 'application/vnd.ms-excel',
-            'pdf' => 'application/pdf',
-            'csv' => 'text/csv',
-            default => 'text/csv', // Default to CSV if format is not recognized
-        };
+        $imported = $results['imported'] ?? 0;
+        $skipped = $results['skipped'] ?? 0;
+        $errors = $results['errors'] ?? 0;
+        
+        $message = "Successfully imported {$imported} customer" . ($imported !== 1 ? 's' : '');
+        
+        if ($skipped > 0) {
+            $message .= ", skipped {$skipped} record" . ($skipped !== 1 ? 's' : '');
+        }
+        
+        if ($errors > 0) {
+            $message .= ", {$errors} error" . ($errors !== 1 ? 's' : ' occurred');
+        }
+        
+        return $message . '.';
+    }
+
+    /**
+     * Validate import file before processing
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function validateImport(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:xlsx,xls,csv,pdf|max:51200',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $file = $request->file('file');
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'File is valid for import',
+            'file_info' => [
+                'name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'type' => $file->getClientOriginalExtension(),
+                'mime_type' => $file->getMimeType()
+            ]
+        ]);
     }
 }

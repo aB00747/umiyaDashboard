@@ -5,18 +5,50 @@ import { UserGroupIcon, CurrencyRupeeIcon, TruckIcon, ChartBarIcon } from '@hero
 export default function CustomerStatistics({ customers }) {
     // Calculate statistics from customer data
     const calculateStatistics = () => {
+        if (!customers || customers.length === 0) {
+            return {
+                totalCustomers: 0,
+                activeCustomers: 0,
+                activePercent: 0,
+                totalRevenue: '₹0',
+                totalOrders: 0,
+                avgOrderValue: '₹0'
+            };
+        }
+
         const totalCustomers = customers.length;
         
-        const activeCustomers = customers.filter(c => c.status === 'Active').length;
+        // Handle different status field formats (status, is_active)
+        const activeCustomers = customers.filter(c => {
+            if (c.status !== undefined) {
+                return c.status === 'Active' || c.status === 'active';
+            }
+            if (c.is_active !== undefined) {
+                return c.is_active === true || c.is_active === 1;
+            }
+            return false;
+        }).length;
+        
         const activePercent = totalCustomers > 0 
             ? Math.round((activeCustomers / totalCustomers) * 100) 
             : 0;
         
         // Calculate total revenue across all customers
         const totalRevenue = customers.reduce((sum, customer) => {
-            // Convert currency string to number (remove ₹ and commas)
-            const revenue = parseFloat(customer.revenue.replace(/[₹,]/g, ''));
-            return sum + revenue;
+            // Handle different revenue field formats
+            const revenueField = customer.revenue || customer.total_revenue || '0';
+            
+            if (typeof revenueField === 'number') {
+                return sum + revenueField;
+            }
+  
+            if (typeof revenueField === 'string') {
+                // Convert currency string to number (remove ₹, commas, and other currency symbols)
+                const revenue = parseFloat(revenueField.replace(/[₹,$,]/g, '') || '0');
+                return sum + (isNaN(revenue) ? 0 : revenue);
+            }
+            
+            return sum;
         }, 0);
         
         // Format revenue as Indian currency
@@ -27,7 +59,10 @@ export default function CustomerStatistics({ customers }) {
         }).format(totalRevenue);
         
         // Calculate total orders across all customers
-        const totalOrders = customers.reduce((sum, customer) => sum + customer.orders, 0);
+        const totalOrders = customers.reduce((sum, customer) => {
+            const ordersCount = customer.orders || customer.total_orders || customer.order_count || 0;
+            return sum + (typeof ordersCount === 'number' ? ordersCount : parseInt(ordersCount) || 0);
+        }, 0);
         
         // Calculate average order value
         const avgOrderValue = totalOrders > 0 

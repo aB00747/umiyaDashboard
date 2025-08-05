@@ -18,6 +18,20 @@ import {
     PaperClipIcon,
 } from "@heroicons/react/24/solid";
 
+/**
+ * CustomerDetails component
+ *
+ * This component displays the details of a selected customer, including 
+ * contact information, financial information, timeline, order history, 
+ * interactions, and documents. It provides tabbed navigation to switch 
+ * between different sections of customer data.
+ *
+ * @param {Object} customer - The customer object containing details to display.
+ *   If no customer is selected, it shows a message indicating that no customer 
+ *   is selected.
+ * 
+ * @returns {JSX.Element} - The rendered component.
+ */
 export default function CustomerDetails({ customer }) {
     const [activeTab, setActiveTab] = useState("overview");
 
@@ -150,6 +164,59 @@ export default function CustomerDetails({ customer }) {
         },
     ];
 
+    /**
+     * Formats an address object into a human-readable string
+     * 
+     * @param {Object} address - The address object containing the following properties:
+     *   - address_line1: string
+     *   - address_line2: string
+     *   - city: string
+     *   - state: string
+     *   - pin_code: string
+     * 
+     * @returns {string} - A formatted string representing the address or "N/A" if no parts are present
+     */
+    const getAddress = (address) => {
+        console.log("address", address);
+        
+        // Handle null or undefined address
+        if (!address || typeof address !== 'object') {
+            return "N/A";
+        }
+        // Extract address components with fallbacks
+        const addressLine1 = address.address_line1?.trim() || '';
+        const addressLine2 = address.address_line2?.trim() || '';
+        const city = address.city?.trim() || '';
+        const state = address.state?.trim() || '';
+        const pinCode = address.pin_code || '';
+
+        // Build address parts array (only include non-empty values)
+        const addressParts = [];
+        
+        if (addressLine1) {
+            addressParts.push(addressLine1);
+        }
+        
+        if (addressLine2) {
+            addressParts.push(addressLine2);
+        }
+        
+        if (city) {
+            addressParts.push(city);
+        }
+        
+        if (state) {
+            addressParts.push(state);
+        }
+        
+        if (pinCode) {
+            addressParts.push(pinCode);
+        }
+
+        // Return formatted address or N/A if no parts
+        return addressParts.length > 0 ? addressParts.join(', ') : "N/A";
+    };
+
     return (
         <div className="app-card">
             {/* Customer Header */}
@@ -157,7 +224,7 @@ export default function CustomerDetails({ customer }) {
                 <div className="flex justify-between items-start">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900">
-                            {customer.name}
+                            {customer.company_name}
                         </h2>
                         <p className="app-text">
                             <span
@@ -232,7 +299,7 @@ export default function CustomerDetails({ customer }) {
                                     <div className="flex items-center">
                                         <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
                                         <span className="text-sm text-gray-900">
-                                            {customer.contactPerson}
+                                            {customer.full_name}
                                         </span>
                                     </div>
                                     <div className="flex items-center">
@@ -250,7 +317,7 @@ export default function CustomerDetails({ customer }) {
                                     <div className="flex items-start">
                                         <MapPinIcon className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
                                         <span className="text-sm text-gray-900">
-                                            {customer.address}
+                                            {getAddress(customer.address)}
                                         </span>
                                     </div>
                                 </div>
@@ -323,7 +390,7 @@ export default function CustomerDetails({ customer }) {
                                     </div>
                                     <span className="text-sm font-medium text-gray-900">
                                         {new Date(
-                                            customer.joinDate
+                                            customer.created_at
                                         ).toLocaleDateString()}
                                     </span>
                                 </div>

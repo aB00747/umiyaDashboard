@@ -46,9 +46,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // File import & export API
         Route::post('/import', [CustomerController::class, 'import']);
-        Route::get('/import/template', [CustomerController::class, 'downloadTemplate']);
-
-        // Template download
-        // Route::get('/export/template', [CustomerController::class, 'downloadTemplate']);
+        Route::post('/import/validate', [CustomerController::class, 'validateImport']);
+        Route::get('/export/template', [CustomerController::class, 'downloadTemplate']);
     });
 });
