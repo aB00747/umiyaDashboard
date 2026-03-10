@@ -246,18 +246,18 @@ export default function Orders() {
             <form onSubmit={handleSave} className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Customer *</label>
+                  <label htmlFor="customer" className="block text-sm font-medium text-gray-700 mb-1">Customer *</label>
                   <select required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.customer} onChange={(e) => setForm({ ...form, customer: e.target.value })}>
                     <option value="">Select Customer</option>
                     {customers.map((c) => <option key={c.id} value={c.id}>{c.full_name} {c.company_name ? `(${c.company_name})` : ''}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Order Date</label>
+                  <label htmlFor="orderDate" className="block text-sm font-medium text-gray-700 mb-1">Order Date</label>
                   <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.order_date} onChange={(e) => setForm({ ...form, order_date: e.target.value })} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Expected Delivery Date</label>
+                  <label htmlFor="deliveryDate" className="block text-sm font-medium text-gray-700 mb-1">Expected Delivery Date</label>
                   <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.expected_delivery_date} onChange={(e) => setForm({ ...form, expected_delivery_date: e.target.value })} />
                 </div>
               </div>
