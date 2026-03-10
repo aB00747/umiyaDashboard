@@ -256,6 +256,10 @@ export default function Orders() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Order Date</label>
                   <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.order_date} onChange={(e) => setForm({ ...form, order_date: e.target.value })} />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Expected Delivery Date</label>
+                  <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.expected_delivery_date} onChange={(e) => setForm({ ...form, expected_delivery_date: e.target.value })} />
+                </div>
               </div>
 
               <div>
