@@ -6,7 +6,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY . .
+COPY index.html vite.config.js eslint.config.js ./
+COPY public/ public/
+COPY src/ src/
 RUN npm run build
 
 # Stage 2: Serve

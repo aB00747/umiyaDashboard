@@ -13,7 +13,9 @@ RUN apt-get update && \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY manage.py .
+COPY config/ config/
+COPY apps/ apps/
 
 # Collect static files, create non-root user and transfer ownership
 RUN python manage.py collectstatic --noinput && \
