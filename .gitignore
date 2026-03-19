@@ -29,3 +29,6 @@ backend/media/
 
 # Claude AI config
 .claude/
+
+# Commit message
+commitmsg.txt
