@@ -18,7 +18,7 @@ COPY config/ config/
 COPY apps/ apps/
 
 # Collect static files, create non-root user and transfer ownership
-RUN python manage.py collectstatic --noinput && \
+RUN SECRET_KEY=build-only-placeholder python manage.py collectstatic --noinput && \
     addgroup --system appgroup && \
     adduser --system --ingroup appgroup appuser && \
     chown -R appuser:appgroup /app
