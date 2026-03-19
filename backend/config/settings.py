@@ -4,9 +4,10 @@ from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
-if not SECRET_KEY:
-    raise ValueError('SECRET_KEY environment variable is required')
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-umiya-dev-key-change-in-production'
+)
 
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1')
 
