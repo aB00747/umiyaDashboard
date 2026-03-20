@@ -6,10 +6,10 @@ import toast from 'react-hot-toast';
 import { Plus, X, Edit2, Truck } from 'lucide-react';
 
 const statusColors = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  in_transit: 'bg-blue-100 text-blue-800',
-  delivered: 'bg-green-100 text-green-800',
-  failed: 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  in_transit: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  delivered: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 };
 
 export default function Deliveries() {
@@ -80,14 +80,14 @@ export default function Deliveries() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Deliveries</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Deliveries</h1>
         <button onClick={() => openDialog()} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700">
           <Plus className="h-4 w-4" /> Add Delivery
         </button>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+        <select className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="">All Status</option>
           <option value="pending">Pending</option>
           <option value="in_transit">In Transit</option>
@@ -98,53 +98,53 @@ export default function Deliveries() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {deliveries.map((d) => (
-          <div key={d.id} className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
+          <div key={d.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Truck className="h-5 w-5 text-indigo-500" />
-                <span className="font-semibold text-gray-900">{d.order_number || `Order #${d.order}`}</span>
+                <Truck className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
+                <span className="font-semibold text-gray-900 dark:text-white">{d.order_number || `Order #${d.order}`}</span>
               </div>
               <span className={classNames('px-2 py-0.5 rounded-full text-xs font-medium', statusColors[d.status])}>{d.status.replace('_', ' ')}</span>
             </div>
-            <div className="text-sm text-gray-600 space-y-1">
-              {d.tracking_number && <p>Tracking: <span className="font-medium">{d.tracking_number}</span></p>}
+            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              {d.tracking_number && <p>Tracking: <span className="font-medium text-gray-900 dark:text-white">{d.tracking_number}</span></p>}
               {d.driver_name && <p>Driver: {d.driver_name} {d.driver_phone && `(${d.driver_phone})`}</p>}
               {d.vehicle_number && <p>Vehicle: {d.vehicle_number}</p>}
               {d.delivery_date && <p>Date: {formatDate(d.delivery_date)}</p>}
             </div>
-            <button onClick={() => openDialog(d)} className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+            <button onClick={() => openDialog(d)} className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
               <Edit2 className="h-3.5 w-3.5" /> Edit
             </button>
           </div>
         ))}
         {deliveries.length === 0 && (
-          <div className="col-span-full text-center py-10 text-gray-500">No deliveries found</div>
+          <div className="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">No deliveries found</div>
         )}
       </div>
 
       {dialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto m-4">
-            <div className="flex items-center justify-between p-5 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">{editId ? 'Edit' : 'Add'} Delivery</h3>
-              <button onClick={() => setDialogOpen(false)} className="p-1 hover:bg-gray-100 rounded"><X className="h-5 w-5" /></button>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto m-4">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{editId ? 'Edit' : 'Add'} Delivery</h3>
+              <button onClick={() => setDialogOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><X className="h-5 w-5 text-gray-500 dark:text-gray-400" /></button>
             </div>
             <form onSubmit={handleSave} className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Order *</label>
-                <select required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.order} onChange={(e) => setForm({ ...form, order: e.target.value })}>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order *</label>
+                <select required className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.order} onChange={(e) => setForm({ ...form, order: e.target.value })}>
                   <option value="">Select Order</option>
                   {orders.map((o) => <option key={o.id} value={o.id}>{o.order_number} - {o.customer_name}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Date</label>
-                  <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.delivery_date || ''} onChange={(e) => setForm({ ...form, delivery_date: e.target.value })} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Delivery Date</label>
+                  <input type="date" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.delivery_date || ''} onChange={(e) => setForm({ ...form, delivery_date: e.target.value })} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                     <option value="pending">Pending</option>
                     <option value="in_transit">In Transit</option>
                     <option value="delivered">Delivered</option>
@@ -153,16 +153,16 @@ export default function Deliveries() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Number</label><input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.vehicle_number} onChange={(e) => setForm({ ...form, vehicle_number: e.target.value })} /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Tracking Number</label><input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.tracking_number} onChange={(e) => setForm({ ...form, tracking_number: e.target.value })} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vehicle Number</label><input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.vehicle_number} onChange={(e) => setForm({ ...form, vehicle_number: e.target.value })} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tracking Number</label><input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.tracking_number} onChange={(e) => setForm({ ...form, tracking_number: e.target.value })} /></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Driver Name</label><input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.driver_name} onChange={(e) => setForm({ ...form, driver_name: e.target.value })} /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Driver Phone</label><input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.driver_phone} onChange={(e) => setForm({ ...form, driver_phone: e.target.value })} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Driver Name</label><input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.driver_name} onChange={(e) => setForm({ ...form, driver_name: e.target.value })} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Driver Phone</label><input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.driver_phone} onChange={(e) => setForm({ ...form, driver_phone: e.target.value })} /></div>
               </div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Address</label><textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
+              <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label><textarea className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setDialogOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
+                <button type="button" onClick={() => setDialogOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                 <button type="submit" disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-50">{saving ? 'Saving...' : editId ? 'Update' : 'Create'}</button>
               </div>
             </form>

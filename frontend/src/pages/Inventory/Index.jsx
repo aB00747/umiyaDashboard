@@ -102,7 +102,7 @@ export default function Inventory() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Inventory</h1>
         <button
           onClick={() => openDialog(tab === 'stock' ? 'stock' : tab === 'chemicals' ? 'chemical' : tab === 'categories' ? 'category' : 'vendor')}
           className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700"
@@ -112,14 +112,14 @@ export default function Inventory() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
+      <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={classNames(
               'flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-colors',
-              tab === t.key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              tab === t.key ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             )}
           >
             <t.icon className="h-4 w-4" /> {t.label}
@@ -128,128 +128,128 @@ export default function Inventory() {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         {tab === 'chemicals' && (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Code</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Category</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Qty</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Price</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Name</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Code</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Category</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Qty</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Price</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody>
               {chemicals.map((c) => (
-                <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr key={c.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">
-                      {c.is_low_stock && <AlertTriangle className="h-4 w-4 text-red-500" />}
-                      <span className="font-medium text-gray-900">{c.chemical_name}</span>
+                      {c.is_low_stock && <AlertTriangle className="h-4 w-4 text-red-500 dark:text-red-400" />}
+                      <span className="font-medium text-gray-900 dark:text-white">{c.chemical_name}</span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-gray-600">{c.chemical_code}</td>
-                  <td className="py-3 px-4 text-gray-600">{c.category_name || '-'}</td>
-                  <td className="py-3 px-4 text-right text-gray-900">{c.quantity} {c.unit}</td>
-                  <td className="py-3 px-4 text-right text-gray-900">{formatCurrency(c.selling_price)}</td>
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{c.chemical_code}</td>
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{c.category_name || '-'}</td>
+                  <td className="py-3 px-4 text-right text-gray-900 dark:text-white">{c.quantity} {c.unit}</td>
+                  <td className="py-3 px-4 text-right text-gray-900 dark:text-white">{formatCurrency(c.selling_price)}</td>
                   <td className="py-3 px-4 text-right">
-                    <button onClick={() => openDialog('chemical', c)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded"><Edit2 className="h-4 w-4" /></button>
-                    <button onClick={() => handleDelete('chemicals', c.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => openDialog('chemical', c)} className="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded"><Edit2 className="h-4 w-4" /></button>
+                    <button onClick={() => handleDelete('chemicals', c.id)} className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded"><Trash2 className="h-4 w-4" /></button>
                   </td>
                 </tr>
               ))}
-              {chemicals.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-gray-500">No chemicals</td></tr>}
+              {chemicals.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-gray-500 dark:text-gray-400">No chemicals</td></tr>}
             </tbody>
           </table>
         )}
 
         {tab === 'categories' && (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Description</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Name</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Description</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody>
               {categories.map((c) => (
-                <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium text-gray-900">{c.name}</td>
-                  <td className="py-3 px-4 text-gray-600">{c.description || '-'}</td>
+                <tr key={c.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{c.name}</td>
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{c.description || '-'}</td>
                   <td className="py-3 px-4 text-right">
-                    <button onClick={() => openDialog('category', c)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded"><Edit2 className="h-4 w-4" /></button>
-                    <button onClick={() => handleDelete('categories', c.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => openDialog('category', c)} className="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded"><Edit2 className="h-4 w-4" /></button>
+                    <button onClick={() => handleDelete('categories', c.id)} className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded"><Trash2 className="h-4 w-4" /></button>
                   </td>
                 </tr>
               ))}
-              {categories.length === 0 && <tr><td colSpan={3} className="py-10 text-center text-gray-500">No categories</td></tr>}
+              {categories.length === 0 && <tr><td colSpan={3} className="py-10 text-center text-gray-500 dark:text-gray-400">No categories</td></tr>}
             </tbody>
           </table>
         )}
 
         {tab === 'vendors' && (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Contact</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Phone</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">GSTIN</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Name</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Contact</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Phone</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">GSTIN</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody>
               {vendors.map((v) => (
-                <tr key={v.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium text-gray-900">{v.vendor_name}</td>
-                  <td className="py-3 px-4 text-gray-600">{v.contact_person || '-'}</td>
-                  <td className="py-3 px-4 text-gray-600">{v.phone || '-'}</td>
-                  <td className="py-3 px-4 text-gray-600">{v.gstin || '-'}</td>
+                <tr key={v.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{v.vendor_name}</td>
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{v.contact_person || '-'}</td>
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{v.phone || '-'}</td>
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{v.gstin || '-'}</td>
                   <td className="py-3 px-4 text-right">
-                    <button onClick={() => openDialog('vendor', v)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded"><Edit2 className="h-4 w-4" /></button>
-                    <button onClick={() => handleDelete('vendors', v.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => openDialog('vendor', v)} className="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded"><Edit2 className="h-4 w-4" /></button>
+                    <button onClick={() => handleDelete('vendors', v.id)} className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded"><Trash2 className="h-4 w-4" /></button>
                   </td>
                 </tr>
               ))}
-              {vendors.length === 0 && <tr><td colSpan={5} className="py-10 text-center text-gray-500">No vendors</td></tr>}
+              {vendors.length === 0 && <tr><td colSpan={5} className="py-10 text-center text-gray-500 dark:text-gray-400">No vendors</td></tr>}
             </tbody>
           </table>
         )}
 
         {tab === 'stock' && (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Chemical</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Type</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Qty</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Rate</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Vendor</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Chemical</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Type</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Qty</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Rate</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Vendor</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody>
               {stockEntries.map((s) => (
-                <tr key={s.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium text-gray-900">{s.chemical_name}</td>
+                <tr key={s.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{s.chemical_name}</td>
                   <td className="py-3 px-4">
                     <span className={classNames('px-2 py-0.5 rounded-full text-xs font-medium',
-                      s.entry_type === 'purchase' ? 'bg-green-50 text-green-700' :
-                      s.entry_type === 'sale' ? 'bg-blue-50 text-blue-700' : 'bg-yellow-50 text-yellow-700'
+                      s.entry_type === 'purchase' ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      s.entry_type === 'sale' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                     )}>{s.entry_type}</span>
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-900">{s.quantity}</td>
-                  <td className="py-3 px-4 text-right text-gray-900">{s.rate ? formatCurrency(s.rate) : '-'}</td>
-                  <td className="py-3 px-4 text-gray-600">{s.vendor_name || '-'}</td>
+                  <td className="py-3 px-4 text-right text-gray-900 dark:text-white">{s.quantity}</td>
+                  <td className="py-3 px-4 text-right text-gray-900 dark:text-white">{s.rate ? formatCurrency(s.rate) : '-'}</td>
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{s.vendor_name || '-'}</td>
                   <td className="py-3 px-4 text-right">
-                    <button onClick={() => handleDelete('stock', s.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => handleDelete('stock', s.id)} className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded"><Trash2 className="h-4 w-4" /></button>
                   </td>
                 </tr>
               ))}
-              {stockEntries.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-gray-500">No stock entries</td></tr>}
+              {stockEntries.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-gray-500 dark:text-gray-400">No stock entries</td></tr>}
             </tbody>
           </table>
         )}
@@ -258,12 +258,12 @@ export default function Inventory() {
       {/* Dialog */}
       {dialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto m-4">
-            <div className="flex items-center justify-between p-5 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto m-4">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {editId ? 'Edit' : 'Add'} {dialogType.charAt(0).toUpperCase() + dialogType.slice(1)}
               </h3>
-              <button onClick={() => setDialogOpen(false)} className="p-1 hover:bg-gray-100 rounded"><X className="h-5 w-5" /></button>
+              <button onClick={() => setDialogOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><X className="h-5 w-5 text-gray-500 dark:text-gray-400" /></button>
             </div>
             <form onSubmit={handleSave} className="p-5 space-y-4">
               {dialogType === 'chemical' && (
@@ -271,8 +271,8 @@ export default function Inventory() {
                   <Field label="Chemical Name *" value={form.chemical_name} onChange={(v) => setForm({ ...form, chemical_name: v })} required />
                   <Field label="Code *" value={form.chemical_code} onChange={(v) => setForm({ ...form, chemical_code: v })} required />
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.category || ''} onChange={(e) => setForm({ ...form, category: e.target.value || null })}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.category || ''} onChange={(e) => setForm({ ...form, category: e.target.value || null })}>
                       <option value="">None</option>
                       {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
@@ -310,15 +310,15 @@ export default function Inventory() {
               {dialogType === 'stock' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Chemical *</label>
-                    <select required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.chemical} onChange={(e) => setForm({ ...form, chemical: e.target.value })}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chemical *</label>
+                    <select required className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.chemical} onChange={(e) => setForm({ ...form, chemical: e.target.value })}>
                       <option value="">Select Chemical</option>
                       {chemicals.map((c) => <option key={c.id} value={c.id}>{c.chemical_name}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-                    <select required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.entry_type} onChange={(e) => setForm({ ...form, entry_type: e.target.value })}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
+                    <select required className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.entry_type} onChange={(e) => setForm({ ...form, entry_type: e.target.value })}>
                       <option value="purchase">Purchase</option>
                       <option value="sale">Sale</option>
                       <option value="adjustment">Adjustment</option>
@@ -329,8 +329,8 @@ export default function Inventory() {
                     <Field label="Rate" type="number" value={form.rate} onChange={(v) => setForm({ ...form, rate: v })} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Vendor</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value={form.vendor || ''} onChange={(e) => setForm({ ...form, vendor: e.target.value || null })}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vendor</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value={form.vendor || ''} onChange={(e) => setForm({ ...form, vendor: e.target.value || null })}>
                       <option value="">None</option>
                       {vendors.map((v) => <option key={v.id} value={v.id}>{v.vendor_name}</option>)}
                     </select>
@@ -339,7 +339,7 @@ export default function Inventory() {
                 </>
               )}
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setDialogOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
+                <button type="button" onClick={() => setDialogOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                 <button type="submit" disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-50">
                   {saving ? 'Saving...' : editId ? 'Update' : 'Create'}
                 </button>
@@ -355,9 +355,9 @@ export default function Inventory() {
 function Field({ label, value, onChange, type = 'text', required = false }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
       <input type={type} required={required} step={type === 'number' ? 'any' : undefined}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
         value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
     </div>
   );

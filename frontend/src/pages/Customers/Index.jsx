@@ -153,9 +153,9 @@ export default function Customers() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Customers</h1>
         <div className="flex items-center gap-2">
-          <button onClick={handleExport} className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button onClick={handleExport} className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
             <Download className="h-4 w-4" /> Export
           </button>
           <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700">
@@ -167,36 +167,36 @@ export default function Customers() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total', value: stats.total, icon: Users, color: 'text-indigo-600 bg-indigo-50' },
-          { label: 'Active', value: stats.active, icon: UserCheck, color: 'text-green-600 bg-green-50' },
-          { label: 'Inactive', value: stats.inactive, icon: UserX, color: 'text-red-600 bg-red-50' },
-          { label: 'Companies', value: customers.filter((c) => c.company_name).length, icon: Building2, color: 'text-blue-600 bg-blue-50' },
+          { label: 'Total', value: stats.total, icon: Users, color: 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/30' },
+          { label: 'Active', value: stats.active, icon: UserCheck, color: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30' },
+          { label: 'Inactive', value: stats.inactive, icon: UserX, color: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30' },
+          { label: 'Companies', value: customers.filter((c) => c.company_name).length, icon: Building2, color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30' },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center gap-3">
+          <div key={s.label} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3">
             <div className={`p-2 rounded-lg ${s.color}`}><s.icon className="h-5 w-5" /></div>
             <div>
-              <p className="text-xs text-gray-500">{s.label}</p>
-              <p className="text-lg font-bold text-gray-900">{s.value}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{s.value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search customers..."
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setFilters({ ...filters, page: 1 }); }}
             />
           </div>
           <select
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={filters.is_active}
             onChange={(e) => setFilters({ ...filters, is_active: e.target.value, page: 1 })}
           >
@@ -205,7 +205,7 @@ export default function Customers() {
             <option value="false">Inactive</option>
           </select>
           <select
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={filters.customer_type}
             onChange={(e) => setFilters({ ...filters, customer_type: e.target.value, page: 1 })}
           >
@@ -215,57 +215,57 @@ export default function Customers() {
             <option value="Distributor">Distributor</option>
             <option value="Industrial">Industrial</option>
           </select>
-          <button onClick={loadCustomers} className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+          <button onClick={loadCustomers} className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
             <RefreshCw className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Company</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Phone</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">City</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Type</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Name</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Company</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Phone</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">City</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Type</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Status</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr><td colSpan={7} className="py-10 text-center"><div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600" /></td></tr>
               ) : customers.length === 0 ? (
-                <tr><td colSpan={7} className="py-10 text-center text-gray-500">No customers found</td></tr>
+                <tr><td colSpan={7} className="py-10 text-center text-gray-500 dark:text-gray-400">No customers found</td></tr>
               ) : (
                 customers.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer" onClick={() => setSelected(c)}>
+                  <tr key={c.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer" onClick={() => setSelected(c)}>
                     <td className="py-3 px-4">
-                      <p className="font-medium text-gray-900">{c.full_name}</p>
-                      <p className="text-xs text-gray-500">{c.email}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{c.full_name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{c.email}</p>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{c.company_name || '-'}</td>
-                    <td className="py-3 px-4 text-gray-600">{c.phone || '-'}</td>
-                    <td className="py-3 px-4 text-gray-600">{c.city || '-'}</td>
+                    <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{c.company_name || '-'}</td>
+                    <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{c.phone || '-'}</td>
+                    <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{c.city || '-'}</td>
                     <td className="py-3 px-4">
                       {c.customer_type && (
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">{c.customer_type}</span>
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">{c.customer_type}</span>
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <span className={classNames('inline-flex px-2 py-0.5 rounded-full text-xs font-medium', c.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700')}>
+                      <span className={classNames('inline-flex px-2 py-0.5 rounded-full text-xs font-medium', c.is_active ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400')}>
                         {c.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded">
+                      <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} className="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded">
                         <Edit2 className="h-4 w-4" />
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded">
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </td>
@@ -276,15 +276,15 @@ export default function Customers() {
           </table>
         </div>
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
-          <p className="text-sm text-gray-500">Page {filters.page} of {totalPages}</p>
+        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Page {filters.page} of {totalPages}</p>
           <div className="flex gap-2">
             <button disabled={filters.page <= 1} onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
-              className="p-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">
+              className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button disabled={filters.page >= totalPages} onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
-              className="p-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">
+              className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -293,18 +293,18 @@ export default function Customers() {
 
       {/* Detail panel */}
       {selected && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 z-40 overflow-y-auto">
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-900">Customer Details</h3>
-            <button onClick={() => setSelected(null)} className="p-1 hover:bg-gray-100 rounded"><X className="h-5 w-5" /></button>
+        <div className="fixed inset-y-0 right-0 w-96 bg-white dark:bg-gray-800 shadow-xl border-l border-gray-200 dark:border-gray-700 z-40 overflow-y-auto">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="font-semibold text-gray-900 dark:text-white">Customer Details</h3>
+            <button onClick={() => setSelected(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><X className="h-5 w-5 text-gray-500 dark:text-gray-400" /></button>
           </div>
           <div className="p-4 space-y-4">
             <div className="text-center">
-              <div className="mx-auto h-16 w-16 bg-indigo-100 rounded-full flex items-center justify-center mb-2">
-                <span className="text-xl font-bold text-indigo-600">{selected.first_name?.[0]}{selected.last_name?.[0]}</span>
+              <div className="mx-auto h-16 w-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mb-2">
+                <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{selected.first_name?.[0]}{selected.last_name?.[0]}</span>
               </div>
-              <h4 className="font-semibold text-gray-900">{selected.full_name}</h4>
-              <p className="text-sm text-gray-500">{selected.company_name}</p>
+              <h4 className="font-semibold text-gray-900 dark:text-white">{selected.full_name}</h4>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{selected.company_name}</p>
             </div>
             {[
               ['Email', selected.email],
@@ -317,13 +317,13 @@ export default function Customers() {
               ['Created', formatDate(selected.created_at)],
             ].map(([label, val]) => val && (
               <div key={label} className="flex justify-between text-sm">
-                <span className="text-gray-500">{label}</span>
-                <span className="text-gray-900 font-medium">{val}</span>
+                <span className="text-gray-500 dark:text-gray-400">{label}</span>
+                <span className="text-gray-900 dark:text-white font-medium">{val}</span>
               </div>
             ))}
             <div className="flex gap-2 pt-2">
               <button onClick={() => openEdit(selected)} className="flex-1 px-3 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700">Edit</button>
-              <button onClick={() => handleDelete(selected.id)} className="px-3 py-2 border border-red-300 text-red-600 text-sm rounded-lg hover:bg-red-50">Delete</button>
+              <button onClick={() => handleDelete(selected.id)} className="px-3 py-2 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">Delete</button>
             </div>
           </div>
         </div>
@@ -332,26 +332,26 @@ export default function Customers() {
       {/* Create/Edit Dialog */}
       {dialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
-            <div className="flex items-center justify-between p-5 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {dialogMode === 'create' ? 'Add Customer' : 'Edit Customer'}
               </h3>
-              <button onClick={() => setDialogOpen(false)} className="p-1 hover:bg-gray-100 rounded">
-                <X className="h-5 w-5" />
+              <button onClick={() => setDialogOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
 
             {/* Tabs */}
             {dialogMode === 'create' && (
-              <div className="flex border-b border-gray-200 px-5">
+              <div className="flex border-b border-gray-200 dark:border-gray-700 px-5">
                 {['manual', 'excel'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={classNames(
                       'px-4 py-3 text-sm font-medium border-b-2 -mb-px capitalize',
-                      activeTab === tab ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                      activeTab === tab ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     )}
                   >
                     {tab === 'excel' ? 'Excel Import' : 'Manual Entry'}
@@ -383,9 +383,9 @@ export default function Customers() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Customer Type</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Type</label>
                     <select
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       value={form.customer_type}
                       onChange={(e) => setForm({ ...form, customer_type: e.target.value })}
                     >
@@ -401,13 +401,13 @@ export default function Customers() {
                       type="checkbox"
                       checked={form.is_active}
                       onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <label className="text-sm text-gray-700">Active</label>
+                    <label className="text-sm text-gray-700 dark:text-gray-300">Active</label>
                   </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
-                  <button type="button" onClick={() => setDialogOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
+                  <button type="button" onClick={() => setDialogOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                   <button type="submit" disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-50">
                     {saving ? 'Saving...' : dialogMode === 'create' ? 'Create' : 'Update'}
                   </button>
@@ -415,24 +415,24 @@ export default function Customers() {
               </form>
             ) : (
               <div className="p-5 space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
                   <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-                  <p className="text-sm text-gray-600 mb-2">Upload Excel or CSV file</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Upload Excel or CSV file</p>
                   <input
                     type="file"
                     accept=".xlsx,.xls,.csv"
                     onChange={(e) => setImportFile(e.target.files[0])}
-                    className="text-sm"
+                    className="text-sm text-gray-700 dark:text-gray-300"
                   />
                 </div>
                 <button
                   onClick={handleTemplateDownload}
-                  className="text-sm text-indigo-600 hover:text-indigo-800 underline"
+                  className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline"
                 >
                   Download template file
                 </button>
                 <div className="flex justify-end gap-3">
-                  <button onClick={() => setDialogOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
+                  <button onClick={() => setDialogOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancel</button>
                   <button
                     onClick={handleImport}
                     disabled={!importFile || saving}
@@ -453,11 +453,11 @@ export default function Customers() {
 function FormField({ label, value, onChange, type = 'text', required = false }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
       <input
         type={type}
         required={required}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
       />

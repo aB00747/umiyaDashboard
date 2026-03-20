@@ -9,7 +9,7 @@ SECRET_KEY = os.environ.get(
     'django-insecure-umiya-dev-key-change-in-production'
 )
 
-DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1')
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1')
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS if h.strip()]
@@ -114,7 +114,7 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
     'CORS_ALLOWED_ORIGINS',
-    'https://localhost:5173,https://127.0.0.1:5173',
+    'http://localhost:5173,http://127.0.0.1:5173',
 ).split(',')
 CORS_ALLOW_CREDENTIALS = True
 
