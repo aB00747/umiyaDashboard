@@ -5,7 +5,10 @@ __pycache__/
 dist/
 build/
 *.egg
+# Environment - .env (local overrides) is ignored, .env.* templates are tracked
 .env
+!.env.development
+!.env.production
 db.sqlite3
 venv/
 .venv/

@@ -27,11 +27,15 @@ jobs:
           --health-retries 5
 
     env:
+      DJANGO_ENV: production
+      SECRET_KEY: ci-test-secret-key-not-for-production
+      DB_ENGINE: django.db.backends.postgresql
       DB_NAME: umiya_dashboard
       DB_USER: postgres
       DB_PASSWORD: postgres123
       DB_HOST: localhost
       DB_PORT: 5432
+      CORS_ALLOWED_ORIGINS: https://localhost
 
     steps:
       - uses: actions/checkout@v4
