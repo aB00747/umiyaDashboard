@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -43,19 +43,12 @@ export default function AuthenticatedLayout() {
   }, []);
 
   useEffect(() => {
-    loadNotifications();
+    notificationsAPI.list()
+      .then(({ data }) => setNotifications(data.results || data || []))
+      .catch(() => undefined);
   }, []);
 
-  async function loadNotifications() {
-    try {
-      const { data } = await notificationsAPI.list();
-      setNotifications(data.results || data || []);
-    } catch {
-      // ignore
-    }
-  }
-
-  async function handleSearch(q) {
+  const handleSearch = useCallback(async (q) => {
     setSearchQuery(q);
     if (q.length < 2) {
       setSearchResults([]);
@@ -68,16 +61,29 @@ export default function AuthenticatedLayout() {
     } catch {
       setSearchResults([]);
     }
-  }
+  }, []);
 
   async function markAllRead() {
     try {
       await notificationsAPI.markAllRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch {
-      // ignore
+      setNotifications((prev) => [...prev]);
     }
   }
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'Escape') {
+        setShowSearch(false);
+        setShowNotifications(false);
+        setShowUserMenu(false);
+        setSidebarOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   if (loading) {
     return (
@@ -96,7 +102,12 @@ export default function AuthenticatedLayout() {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600/75 dark:bg-black/75" onClick={() => setSidebarOpen(false)} />
+          <button
+            type="button"
+            className="fixed inset-0 w-full h-full bg-gray-600/75 dark:bg-black/75 border-none cursor-default"
+            aria-label="Close sidebar"
+            onClick={() => setSidebarOpen(false)}
+          />
           <div className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-900 shadow-xl z-50">
             <SidebarContent currentPath={location.pathname} onClose={() => setSidebarOpen(false)} />
           </div>
@@ -116,6 +127,8 @@ export default function AuthenticatedLayout() {
         <header className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6">
             <button
+              type="button"
+              aria-label="Open sidebar"
               className="lg:hidden p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={() => setSidebarOpen(true)}
             >
@@ -125,9 +138,10 @@ export default function AuthenticatedLayout() {
             {/* Search */}
             <div className="flex-1 max-w-lg mx-4" ref={searchRef}>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
                 <input
-                  type="text"
+                  type="search"
+                  aria-label="Search customers, chemicals, orders"
                   placeholder="Search customers, chemicals, orders..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={searchQuery}
@@ -135,21 +149,24 @@ export default function AuthenticatedLayout() {
                   onFocus={() => searchResults.length > 0 && setShowSearch(true)}
                 />
                 {showSearch && searchResults.length > 0 && (
-                  <div className="absolute top-full mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-80 overflow-y-auto">
-                    {searchResults.map((r, i) => (
-                      <Link
-                        key={i}
-                        to={`/${r.type}s/${r.id}`}
-                        className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
-                        onClick={() => { setShowSearch(false); setSearchQuery(''); }}
-                      >
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">{r.title}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{r.type} {r.subtitle && `- ${r.subtitle}`}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+                  <nav aria-label="Search results">
+                    <ul className="absolute top-full mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-80 overflow-y-auto list-none m-0 p-0">
+                      {searchResults.map((r) => (
+                        <li key={`${r.type}-${r.id}`}>
+                          <Link
+                            to={`/${r.type}s/${r.id}`}
+                            className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                            onClick={() => { setShowSearch(false); setSearchQuery(''); }}
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">{r.title}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{r.type} {r.subtitle && ('- ' + r.subtitle)}</p>
+                            </div>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
                 )}
               </div>
             </div>
@@ -157,9 +174,10 @@ export default function AuthenticatedLayout() {
             <div className="flex items-center gap-3">
               {/* Theme toggle */}
               <button
+                type="button"
                 onClick={toggleTheme}
                 className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
@@ -167,22 +185,26 @@ export default function AuthenticatedLayout() {
               {/* Notifications */}
               <div className="relative" ref={notifRef}>
                 <button
+                  type="button"
+                  aria-label={unreadCount > 0 ? 'Notifications (' + unreadCount + ' unread)' : 'Notifications'}
+                  aria-expanded={showNotifications}
+                  aria-haspopup="true"
                   className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 relative"
                   onClick={() => setShowNotifications(!showNotifications)}
                 >
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" aria-hidden="true">
                       {unreadCount}
                     </span>
                   )}
                 </button>
                 {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                  <div role="menu" className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                       <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</h3>
                       {unreadCount > 0 && (
-                        <button onClick={markAllRead} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">
+                        <button type="button" onClick={markAllRead} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">
                           Mark all read
                         </button>
                       )}
@@ -194,6 +216,7 @@ export default function AuthenticatedLayout() {
                         notifications.slice(0, 10).map((n) => (
                           <div
                             key={n.id}
+                            role="menuitem"
                             className={classNames(
                               'px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0',
                               !n.is_read && 'bg-indigo-50 dark:bg-indigo-900/30'
@@ -212,6 +235,10 @@ export default function AuthenticatedLayout() {
               {/* User menu */}
               <div className="relative" ref={userMenuRef}>
                 <button
+                  type="button"
+                  aria-label="User menu"
+                  aria-expanded={showUserMenu}
+                  aria-haspopup="true"
                   className="flex items-center gap-2 p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                 >
@@ -224,15 +251,18 @@ export default function AuthenticatedLayout() {
                   <ChevronDown className="h-4 w-4" />
                 </button>
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                  <div role="menu" className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                     <Link
                       to="/profile"
+                      role="menuitem"
                       className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="h-4 w-4" /> Profile
                     </Link>
                     <button
+                      type="button"
+                      role="menuitem"
                       onClick={() => { setShowUserMenu(false); logout(); }}
                       className="flex items-center gap-2 w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border-t border-gray-100 dark:border-gray-700"
                     >
@@ -265,12 +295,12 @@ function SidebarContent({ currentPath, onClose }) {
           <span className="font-bold text-gray-900 dark:text-white">Umiya Chemical</span>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="lg:hidden p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          <button type="button" aria-label="Close sidebar" onClick={onClose} className="lg:hidden p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
             <X className="h-5 w-5" />
           </button>
         )}
       </div>
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1" aria-label="Main navigation">
         {navigation.map((item) => {
           const isActive = item.href === '/'
             ? currentPath === '/'
@@ -280,6 +310,7 @@ function SidebarContent({ currentPath, onClose }) {
               key={item.name}
               to={item.href}
               onClick={onClose}
+              aria-current={isActive ? 'page' : undefined}
               className={classNames(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 isActive
@@ -287,7 +318,7 @@ function SidebarContent({ currentPath, onClose }) {
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
               )}
             >
-              <item.icon className={classNames('h-5 w-5', isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500')} />
+              <item.icon className={classNames('h-5 w-5', isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500')} aria-hidden="true" />
               {item.name}
             </Link>
           );
