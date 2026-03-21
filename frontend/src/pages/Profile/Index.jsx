@@ -60,7 +60,7 @@ export default function Profile() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               {user?.first_name} {user?.last_name}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">@{user?.username} - {user?.role}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">@{user?.username} - {user?.role?.label}</p>
           </div>
         </div>
 

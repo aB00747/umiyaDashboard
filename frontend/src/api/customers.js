@@ -23,3 +23,7 @@ export const customersAPI = {
   export: (params) =>
     client.get('/customers/export/', { params, responseType: 'blob' }),
 };
+
+export const customerTypesAPI = {
+  list: () => client.get('/customers/types/'),
+};

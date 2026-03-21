@@ -22,3 +22,10 @@ export const settingsAPI = {
   list: () => client.get('/settings/'),
   update: (key, data) => client.put(`/settings/${key}/`, data),
 };
+
+export const brandingAPI = {
+  get: () => client.get('/branding/'),
+  update: (formData) => client.patch('/branding/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+};

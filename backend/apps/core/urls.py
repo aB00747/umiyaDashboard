@@ -11,4 +11,5 @@ router.register(r'settings', views.SettingViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('search/', views.search_view, name='search'),
+    path('branding/', views.BrandingSettingView.as_view(), name='branding'),
 ]

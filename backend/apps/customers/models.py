@@ -1,14 +1,18 @@
 from django.db import models
 
 
-class Customer(models.Model):
-    CUSTOMER_TYPE_CHOICES = [
-        ('Retail', 'Retail'),
-        ('Wholesale', 'Wholesale'),
-        ('Distributor', 'Distributor'),
-        ('Industrial', 'Industrial'),
-    ]
+class CustomerType(models.Model):
+    name = models.CharField(max_length=50, unique=True)
 
+    class Meta:
+        db_table = 'customer_types'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Customer(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100, blank=True, default='')
     company_name = models.CharField(max_length=200, blank=True, default='')
@@ -25,7 +29,9 @@ class Customer(models.Model):
     email = models.EmailField(blank=True, default='')
     gstin = models.CharField(max_length=15, blank=True, default='')
     pan = models.CharField(max_length=10, blank=True, default='')
-    customer_type = models.CharField(max_length=20, choices=CUSTOMER_TYPE_CHOICES, blank=True, default='')
+    customer_type = models.ForeignKey(
+        CustomerType, null=True, blank=True, on_delete=models.SET_NULL, related_name='customers'
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

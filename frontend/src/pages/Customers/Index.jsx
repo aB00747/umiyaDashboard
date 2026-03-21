@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { customersAPI } from '../../api/customers';
+import { customersAPI, customerTypesAPI } from '../../api/customers';
 import { formatDate } from '../../utils/format';
 import { classNames } from '../../utils/format';
 import toast from 'react-hot-toast';
@@ -10,6 +10,7 @@ import {
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
+  const [customerTypes, setCustomerTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({ is_active: '', customer_type: '', page: 1 });
@@ -21,6 +22,10 @@ export default function Customers() {
   const [importFile, setImportFile] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    customerTypesAPI.list().then(({ data }) => setCustomerTypes(data)).catch(() => {});
+  }, []);
 
   const loadCustomers = useCallback(async () => {
     setLoading(true);
@@ -57,7 +62,10 @@ export default function Customers() {
   }
 
   function openEdit(customer) {
-    setForm({ ...customer });
+    setForm({
+      ...customer,
+      customer_type: customer.customer_type_detail?.id || customer.customer_type || '',
+    });
     setDialogMode('edit');
     setActiveTab('manual');
     setDialogOpen(true);
@@ -67,11 +75,14 @@ export default function Customers() {
     e.preventDefault();
     setSaving(true);
     try {
+      const payload = { ...form };
+      // Send null instead of empty string for FK
+      if (!payload.customer_type) payload.customer_type = null;
       if (dialogMode === 'create') {
-        await customersAPI.create(form);
+        await customersAPI.create(payload);
         toast.success('Customer created');
       } else {
-        await customersAPI.update(form.id, form);
+        await customersAPI.update(payload.id, payload);
         toast.success('Customer updated');
       }
       setDialogOpen(false);
@@ -144,6 +155,10 @@ export default function Customers() {
     }
   }
 
+  function getTypeName(c) {
+    return c.customer_type_detail?.name || '';
+  }
+
   const stats = {
     total: customers.length,
     active: customers.filter((c) => c.is_active).length,
@@ -210,10 +225,9 @@ export default function Customers() {
             onChange={(e) => setFilters({ ...filters, customer_type: e.target.value, page: 1 })}
           >
             <option value="">All Types</option>
-            <option value="Retail">Retail</option>
-            <option value="Wholesale">Wholesale</option>
-            <option value="Distributor">Distributor</option>
-            <option value="Industrial">Industrial</option>
+            {customerTypes.map((ct) => (
+              <option key={ct.id} value={ct.id}>{ct.name}</option>
+            ))}
           </select>
           <button onClick={loadCustomers} className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
             <RefreshCw className="h-4 w-4" />
@@ -252,8 +266,8 @@ export default function Customers() {
                     <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{c.phone || '-'}</td>
                     <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{c.city || '-'}</td>
                     <td className="py-3 px-4">
-                      {c.customer_type && (
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">{c.customer_type}</span>
+                      {getTypeName(c) && (
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">{getTypeName(c)}</span>
                       )}
                     </td>
                     <td className="py-3 px-4">
@@ -309,7 +323,7 @@ export default function Customers() {
             {[
               ['Email', selected.email],
               ['Phone', selected.phone],
-              ['Type', selected.customer_type],
+              ['Type', getTypeName(selected)],
               ['City', selected.city],
               ['State', selected.state],
               ['GSTIN', selected.gstin],
@@ -386,14 +400,13 @@ export default function Customers() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Type</label>
                     <select
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      value={form.customer_type}
-                      onChange={(e) => setForm({ ...form, customer_type: e.target.value })}
+                      value={form.customer_type || ''}
+                      onChange={(e) => setForm({ ...form, customer_type: e.target.value ? Number(e.target.value) : '' })}
                     >
                       <option value="">Select Type</option>
-                      <option value="Retail">Retail</option>
-                      <option value="Wholesale">Wholesale</option>
-                      <option value="Distributor">Distributor</option>
-                      <option value="Industrial">Industrial</option>
+                      {customerTypes.map((ct) => (
+                        <option key={ct.id} value={ct.id}>{ct.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="flex items-center gap-2 pt-6">

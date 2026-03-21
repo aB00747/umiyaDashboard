@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { reportsAPI } from '../../api/reports';
 import { formatCurrency, formatDate } from '../../utils/format';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useBranding } from '../../contexts/BrandingContext';
 import { Users, ShoppingCart, IndianRupee, AlertTriangle, Package, TrendingUp } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -21,6 +22,7 @@ const statusColors = {
 
 export default function Dashboard() {
   const { isDark } = useTheme();
+  const { systemName } = useBranding();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -60,7 +62,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Umiya Acid & Chemical Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{systemName}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Welcome to your operational overview</p>
       </div>
 
