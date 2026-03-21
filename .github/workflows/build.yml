@@ -117,12 +117,14 @@ jobs:
 
       - name: Download backend coverage
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: backend-coverage
           path: backend
 
       - name: Download frontend coverage
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: frontend-coverage
           path: frontend/coverage
