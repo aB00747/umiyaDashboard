@@ -128,6 +128,6 @@ class CustomerExportTest(TestCase):
         self.assertIn('spreadsheetml', res['Content-Type'])
 
     def test_export_template_csv(self):
-        res = self.client.get(reverse('customer-export-template'), {'format': 'csv'})
+        res = self.client.get(reverse('customer-export-template'), {'file_format': 'csv'})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('text/csv', res['Content-Type'])

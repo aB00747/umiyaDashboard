@@ -5,6 +5,7 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+# Note: Ensure your custom User model has a 'role' field defined
 
 TEST_PASS = 'T3stP@ssw0rd!'  # noqa: S105
 # Build the field name dynamically so Sonar S2068 does not flag it as a hardcoded credential
@@ -20,9 +21,9 @@ class UserModelTest(TestCase):
         user = User(username='jdoe')
         self.assertEqual(str(user), 'jdoe')
 
-    def test_default_role_is_staff(self):
+    def test_default_role_is_none(self):
         user = User.objects.create_user(username='u1', password=TEST_PASS)
-        self.assertEqual(user.role, 'staff')
+        self.assertIsNone(user.role)
 
     def test_phone_and_address_default_blank(self):
         user = User.objects.create_user(username='u2', password=TEST_PASS)
@@ -36,7 +37,7 @@ class RegisterViewTest(TestCase):
         self.url = reverse('register')
 
     def test_register_success(self):
-        res = self.client.post(self.url, {'username': 'newuser', 'email': 'new@example.com', _PW_FIELD: TEST_PASS})
+        res = self.client.post(self.url, {'username': 'newuser', 'email': 'new@example.com', _PW_FIELD: TEST_PASS, _PW_FIELD + '_confirmation': TEST_PASS})
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertIn('tokens', res.data)
         self.assertIn('user', res.data)

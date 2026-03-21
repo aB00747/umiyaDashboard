@@ -126,7 +126,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='export/template')
     def export_template(self, request):
-        fmt = request.query_params.get('format', 'xlsx')
+        fmt = request.query_params.get('file_format', 'xlsx')
         headers = ['first_name', 'last_name', 'company_name', 'address_line1', 'city', 'state', 'country', 'pin_code', 'phone', 'email', 'gstin', 'pan', 'customer_type']
 
         if fmt == 'csv':
