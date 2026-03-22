@@ -13,6 +13,7 @@ import Messaging from './pages/Messaging/Index';
 import Reports from './pages/Reports/Index';
 import Documents from './pages/Documents/Index';
 import SettingsPage from './pages/Settings/Index';
+import UsersPage from './pages/Users/Index';
 import Profile from './pages/Profile/Index';
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/reports" element={<Reports />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
     </Routes>

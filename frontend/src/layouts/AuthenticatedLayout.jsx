@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useBranding } from '../contexts/BrandingContext';
 import { navigation } from '../constants/navigation';
 import { searchAPI, notificationsAPI } from '../api/core';
 import {
@@ -16,10 +17,12 @@ import {
   Moon,
 } from 'lucide-react';
 import { classNames } from '../utils/format';
+import { SidebarContent } from '../components/SidebarContent';
 
 export default function AuthenticatedLayout() {
   const { user, loading, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { systemName, logoUrl } = useBranding();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,6 +100,10 @@ export default function AuthenticatedLayout() {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
+  const filteredNav = navigation.filter(
+    (item) => !item.roles || item.roles.includes(user.role?.name)
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar overlay */}
@@ -109,7 +116,7 @@ export default function AuthenticatedLayout() {
             onClick={() => setSidebarOpen(false)}
           />
           <div className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-900 shadow-xl z-50">
-            <SidebarContent currentPath={location.pathname} onClose={() => setSidebarOpen(false)} />
+            <SidebarContent currentPath={location.pathname} onClose={() => setSidebarOpen(false)} systemName={systemName} logoUrl={logoUrl} navItems={filteredNav} />
           </div>
         </div>
       )}
@@ -117,7 +124,7 @@ export default function AuthenticatedLayout() {
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
-          <SidebarContent currentPath={location.pathname} />
+          <SidebarContent currentPath={location.pathname} systemName={systemName} logoUrl={logoUrl} navItems={filteredNav} />
         </div>
       </div>
 
@@ -281,49 +288,5 @@ export default function AuthenticatedLayout() {
         </main>
       </div>
     </div>
-  );
-}
-
-function SidebarContent({ currentPath, onClose }) {
-  return (
-    <>
-      <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">UC</span>
-          </div>
-          <span className="font-bold text-gray-900 dark:text-white">Umiya Chemical</span>
-        </Link>
-        {onClose && (
-          <button type="button" aria-label="Close sidebar" onClick={onClose} className="lg:hidden p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-            <X className="h-5 w-5" />
-          </button>
-        )}
-      </div>
-      <nav className="flex-1 px-3 py-4 space-y-1" aria-label="Main navigation">
-        {navigation.map((item) => {
-          const isActive = item.href === '/'
-            ? currentPath === '/'
-            : currentPath.startsWith(item.href);
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              onClick={onClose}
-              aria-current={isActive ? 'page' : undefined}
-              className={classNames(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
-              )}
-            >
-              <item.icon className={classNames('h-5 w-5', isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500')} aria-hidden="true" />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-    </>
   );
 }

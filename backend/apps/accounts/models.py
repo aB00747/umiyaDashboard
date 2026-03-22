@@ -2,16 +2,29 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class User(AbstractUser):
-    ROLE_CHOICES = [
-        ('admin', 'Admin'),
-        ('manager', 'Manager'),
-        ('staff', 'Staff'),
-    ]
+class Role(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    label = models.CharField(max_length=100)
+    level = models.IntegerField(default=0)
 
+    class Meta:
+        db_table = 'roles'
+        ordering = ['-level']
+
+    def __str__(self):
+        return self.label
+
+
+class User(AbstractUser):
     phone = models.CharField(max_length=15, blank=True, default='')
     address = models.TextField(blank=True, default='')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='staff')
+    role = models.ForeignKey(
+        Role, null=True, on_delete=models.SET_NULL, related_name='users'
+    )
+
+    @property
+    def role_level(self):
+        return self.role.level if self.role else 0
 
     class Meta:
         db_table = 'users'

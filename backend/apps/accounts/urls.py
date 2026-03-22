@@ -1,6 +1,11 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
+
+router = DefaultRouter()
+router.register(r'users', views.UserManagementViewSet, basename='user-management')
+router.register(r'roles', views.RoleViewSet, basename='roles')
 
 urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
@@ -10,4 +15,5 @@ urlpatterns = [
     path('me/', views.me_view, name='me'),
     path('profile/', views.profile_update_view, name='profile_update'),
     path('profile/delete/', views.profile_delete_view, name='profile_delete'),
+    path('', include(router.urls)),
 ]

@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import Customer, Financial
+from .models import Customer, Financial, CustomerType
+
+
+@admin.register(CustomerType)
+class CustomerTypeAdmin(admin.ModelAdmin):
+    list_display = ['name']
 
 
 class FinancialInline(admin.StackedInline):

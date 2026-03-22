@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Country, State, Notification, Setting
+from .models import Country, State, Notification, Setting, BrandingSetting
 
 
 @admin.register(Country)
@@ -26,3 +26,8 @@ class NotificationAdmin(admin.ModelAdmin):
 class SettingAdmin(admin.ModelAdmin):
     list_display = ['key', 'value', 'description']
     search_fields = ['key', 'description']
+
+
+@admin.register(BrandingSetting)
+class BrandingSettingAdmin(admin.ModelAdmin):
+    list_display = ['system_name', 'updated_at']

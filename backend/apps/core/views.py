@@ -1,10 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.db.models import Q
-from .models import Country, State, Notification, Setting
-from .serializers import CountrySerializer, StateSerializer, NotificationSerializer, SettingSerializer
+from .models import Country, State, Notification, Setting, BrandingSetting
+from .serializers import CountrySerializer, StateSerializer, NotificationSerializer, SettingSerializer, BrandingSettingSerializer
 from apps.customers.models import Customer
 from apps.inventory.models import Chemical
 from apps.orders.models import Order
@@ -77,3 +79,25 @@ class SettingViewSet(viewsets.ModelViewSet):
     serializer_class = SettingSerializer
     lookup_field = 'key'
     pagination_class = None
+
+
+class BrandingSettingView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        from apps.accounts.permissions import IsAdminOrAbove
+        return [IsAdminOrAbove()]
+
+    def get(self, request):
+        instance = BrandingSetting.get_instance()
+        serializer = BrandingSettingSerializer(instance, context={'request': request})
+        return Response(serializer.data)
+
+    def patch(self, request):
+        instance = BrandingSetting.get_instance()
+        serializer = BrandingSettingSerializer(instance, data=request.data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

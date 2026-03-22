@@ -13,4 +13,15 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    environment: 'node',
+    setupFiles: ['./src/test-setup.js'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['lcov', 'text'],
+      reportsDirectory: 'coverage',
+      include: ['src/**/*.{js,jsx}'],
+      exclude: ['src/main.jsx', 'src/**/*.test.{js,jsx}'],
+    },
+  },
 })

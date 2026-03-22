@@ -1,6 +1,7 @@
 import {
   Home,
   Users,
+  UserCog,
   Package,
   ShoppingCart,
   Tag,
@@ -21,5 +22,6 @@ export const navigation = [
   { name: 'Messaging', href: '/messaging', icon: MessageSquare },
   { name: 'Reports', href: '/reports', icon: BarChart2 },
   { name: 'Documents', href: '/documents', icon: FileText },
+  { name: 'Users', href: '/users', icon: UserCog, roles: ['super_admin', 'admin'] },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
