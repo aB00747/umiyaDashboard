@@ -161,10 +161,10 @@ class PermissionsTest(TestCase):
         from apps.accounts.models import Role
         from rest_framework.test import APIRequestFactory
         self.factory = APIRequestFactory()
-        self.super_role = Role.objects.create(name='super_admin', label='Super Admin', level=4)
-        self.admin_role = Role.objects.create(name='admin', label='Admin', level=3)
-        self.member_role = Role.objects.create(name='member', label='Member', level=2)
-        self.staff_role = Role.objects.create(name='staff', label='Staff', level=1)
+        self.super_role, _ = Role.objects.get_or_create(name='super_admin', defaults={'label': 'Super Admin', 'level': 4})
+        self.admin_role, _ = Role.objects.get_or_create(name='admin', defaults={'label': 'Admin', 'level': 3})
+        self.member_role, _ = Role.objects.get_or_create(name='member', defaults={'label': 'Member', 'level': 2})
+        self.staff_role, _ = Role.objects.get_or_create(name='staff', defaults={'label': 'Staff', 'level': 1})
 
     def _user_with_role(self, username, role):
         user = User.objects.create_user(username=username, password=TEST_PASS)
@@ -214,13 +214,15 @@ class RoleViewSetTest(TestCase):
         self.client = APIClient()
         self.user = User.objects.create_user(username='role_viewer', password=TEST_PASS)
         self.client.force_authenticate(user=self.user)
-        Role.objects.create(name='staff', label='Staff', level=1)
-        Role.objects.create(name='admin', label='Admin', level=3)
+        Role.objects.get_or_create(name='staff', defaults={'label': 'Staff', 'level': 1})
+        Role.objects.get_or_create(name='admin', defaults={'label': 'Admin', 'level': 3})
 
     def test_list_roles(self):
         res = self.client.get(reverse('roles-list'))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data), 2)
+        names = [r['name'] for r in res.data]
+        self.assertIn('staff', names)
+        self.assertIn('admin', names)
 
     def test_requires_auth(self):
         self.client.force_authenticate(user=None)
@@ -231,8 +233,8 @@ class UserManagementViewSetTest(TestCase):
     def setUp(self):
         from apps.accounts.models import Role
         self.client = APIClient()
-        self.super_role = Role.objects.create(name='super_admin', label='Super Admin', level=4)
-        self.staff_role = Role.objects.create(name='staff', label='Staff', level=1)
+        self.super_role, _ = Role.objects.get_or_create(name='super_admin', defaults={'label': 'Super Admin', 'level': 4})
+        self.staff_role, _ = Role.objects.get_or_create(name='staff', defaults={'label': 'Staff', 'level': 1})
         self.admin_user = User.objects.create_user(username='super_adm', password=TEST_PASS)
         self.admin_user.role = self.super_role
         self.admin_user.save()

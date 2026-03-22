@@ -118,7 +118,16 @@ class NotificationViewSetTest(TestCase):
     def test_list_own_only(self):
         res = self.client.get(reverse('notification-list'))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data), 2)
+        results = res.data['results'] if 'results' in res.data else res.data
+        returned_ids = {n['id'] for n in results}
+        # n1 and n2 belong to self.user and must appear
+        self.assertIn(self.n1.pk, returned_ids)
+        self.assertIn(self.n2.pk, returned_ids)
+        # Notifications for self.other must not appear
+        other_notif_ids = set(
+            Notification.objects.filter(user=self.other).values_list('id', flat=True)
+        )
+        self.assertTrue(returned_ids.isdisjoint(other_notif_ids))
 
     def test_mark_single_read(self):
         res = self.client.post(reverse('notification-read', args=[self.n1.pk]))
@@ -235,7 +244,7 @@ class BrandingSettingViewTest(TestCase):
 
     def test_patch_as_super_admin(self):
         from apps.accounts.models import Role
-        role = Role.objects.create(name='super_admin', label='Super Admin', level=4)
+        role, _ = Role.objects.get_or_create(name='super_admin', defaults={'label': 'Super Admin', 'level': 4})
         self.user.role = role
         self.user.save()
         res = self.client.patch(reverse('branding'), {'system_name': 'Patched'}, format='multipart')
