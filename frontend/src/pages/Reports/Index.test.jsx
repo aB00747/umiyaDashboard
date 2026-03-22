@@ -40,6 +40,11 @@ const INVENTORY_DATA = {
   low_stock: [],
 };
 
+function setupMocks() {
+  reportsAPI.sales.mockResolvedValue({ data: SALES_DATA });
+  reportsAPI.inventory.mockResolvedValue({ data: INVENTORY_DATA });
+}
+
 describe('Reports', () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -50,32 +55,28 @@ describe('Reports', () => {
     expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
-  it('renders Reports heading after load', async () => {
-    reportsAPI.sales.mockResolvedValue({ data: SALES_DATA });
-    reportsAPI.inventory.mockResolvedValue({ data: INVENTORY_DATA });
-    render(<Reports />);
-    await waitFor(() => expect(screen.getByText('Reports & Analytics')).toBeInTheDocument());
-  });
-
-  it('renders sales tab by default', async () => {
-    reportsAPI.sales.mockResolvedValue({ data: SALES_DATA });
-    reportsAPI.inventory.mockResolvedValue({ data: INVENTORY_DATA });
-    render(<Reports />);
-    await waitFor(() => expect(screen.getByText('sales')).toBeInTheDocument());
-  });
-
-  it('renders inventory tab button', async () => {
-    reportsAPI.sales.mockResolvedValue({ data: SALES_DATA });
-    reportsAPI.inventory.mockResolvedValue({ data: INVENTORY_DATA });
-    render(<Reports />);
-    await waitFor(() => expect(screen.getByText('inventory')).toBeInTheDocument());
-  });
-
   it('shows error toast when load fails', async () => {
     const toast = (await import('react-hot-toast')).default;
     reportsAPI.sales.mockRejectedValue(new Error('fail'));
     reportsAPI.inventory.mockRejectedValue(new Error('fail'));
     render(<Reports />);
     await waitFor(() => expect(toast.error).toHaveBeenCalled());
+  });
+
+  describe('with loaded data', () => {
+    beforeEach(async () => {
+      setupMocks();
+      render(<Reports />);
+      await waitFor(() => screen.getByText('Reports & Analytics'));
+    });
+
+    it('renders Reports heading', () => {
+      expect(screen.getByText('Reports & Analytics')).toBeInTheDocument();
+    });
+
+    it('renders sales and inventory tab buttons', () => {
+      expect(screen.getByText('sales')).toBeInTheDocument();
+      expect(screen.getByText('inventory')).toBeInTheDocument();
+    });
   });
 });

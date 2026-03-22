@@ -16,9 +16,9 @@ import GuestLayout from './GuestLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { useBranding } from '../contexts/BrandingContext';
 
-function render$(authState = { user: null, loading: false }) {
+function render$({ authState = { user: null, loading: false }, systemName = 'Test App', logoUrl = '' } = {}) {
   useAuth.mockReturnValue(authState);
-  useBranding.mockReturnValue({ systemName: 'Test App', logoUrl: '' });
+  useBranding.mockReturnValue({ systemName, logoUrl });
   return render(
     <MemoryRouter initialEntries={['/login']}>
       <Routes>
@@ -33,7 +33,7 @@ function render$(authState = { user: null, loading: false }) {
 
 describe('GuestLayout', () => {
   it('shows loading spinner when auth is loading', () => {
-    render$({ user: null, loading: true });
+    render$({ authState: { user: null, loading: true } });
     expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
@@ -48,37 +48,17 @@ describe('GuestLayout', () => {
   });
 
   it('redirects to / when user is authenticated', () => {
-    render$({ user: { id: 1 }, loading: false });
+    render$({ authState: { user: { id: 1 }, loading: false } });
     expect(screen.getByText('Home Page')).toBeInTheDocument();
   });
 
   it('renders logo image when logoUrl is provided', () => {
-    useAuth.mockReturnValue({ user: null, loading: false });
-    useBranding.mockReturnValue({ systemName: 'App', logoUrl: 'http://logo.png' });
-    render(
-      <MemoryRouter initialEntries={['/login']}>
-        <Routes>
-          <Route element={<GuestLayout />}>
-            <Route path="/login" element={<div>Login</div>} />
-          </Route>
-        </Routes>
-      </MemoryRouter>
-    );
+    render$({ systemName: 'App', logoUrl: 'https://example.com/logo.png' });
     expect(screen.getByAltText('App')).toBeInTheDocument();
   });
 
   it('uses fallback text when no system name', () => {
-    useAuth.mockReturnValue({ user: null, loading: false });
-    useBranding.mockReturnValue({ systemName: '', logoUrl: '' });
-    render(
-      <MemoryRouter initialEntries={['/login']}>
-        <Routes>
-          <Route element={<GuestLayout />}>
-            <Route path="/login" element={<div>Login</div>} />
-          </Route>
-        </Routes>
-      </MemoryRouter>
-    );
+    render$({ systemName: '' });
     expect(screen.getByText('Umiya Acid & Chemical')).toBeInTheDocument();
   });
 });

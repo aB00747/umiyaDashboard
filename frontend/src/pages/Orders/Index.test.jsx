@@ -39,18 +39,6 @@ describe('Orders', () => {
     expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
-  it('renders Orders heading after load', async () => {
-    setup();
-    render(<Orders />);
-    await waitFor(() => expect(screen.getByText('Orders')).toBeInTheDocument());
-  });
-
-  it('renders order rows when data loaded', async () => {
-    setup();
-    render(<Orders />);
-    await waitFor(() => expect(screen.getByText('ORD-001')).toBeInTheDocument());
-  });
-
   it('shows empty state when no orders', async () => {
     ordersAPI.list.mockResolvedValue({ data: { results: [], count: 0 } });
     customersAPI.list.mockResolvedValue({ data: [] });
@@ -68,41 +56,31 @@ describe('Orders', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalled());
   });
 
-  it('renders Create Order button', async () => {
-    setup();
-    render(<Orders />);
-    await waitFor(() => expect(screen.getAllByText('Create Order').length).toBeGreaterThan(0));
-  });
+  describe('with loaded orders', () => {
+    beforeEach(async () => {
+      setup();
+      render(<Orders />);
+      await waitFor(() => screen.getByText('Orders'));
+    });
 
-  it('opens Create Order dialog on button click', async () => {
-    setup();
-    render(<Orders />);
-    await waitFor(() => screen.getAllByText('Create Order'));
-    fireEvent.click(screen.getAllByText('Create Order')[0]);
-    await waitFor(() => expect(screen.getByText('Select Customer')).toBeInTheDocument());
-  });
+    it('renders Orders heading and order row', () => {
+      expect(screen.getByText('Orders')).toBeInTheDocument();
+      expect(screen.getByText('ORD-001')).toBeInTheDocument();
+    });
 
-  it('renders status filter dropdown', async () => {
-    setup();
-    render(<Orders />);
-    await waitFor(() => expect(screen.getByText('All Status')).toBeInTheDocument());
-  });
+    it('renders filter dropdowns and pagination', () => {
+      expect(screen.getByText('All Status')).toBeInTheDocument();
+      expect(screen.getByText('All Payment')).toBeInTheDocument();
+      expect(screen.getByText(/Page 1/)).toBeInTheDocument();
+    });
 
-  it('renders payment filter dropdown', async () => {
-    setup();
-    render(<Orders />);
-    await waitFor(() => expect(screen.getByText('All Payment')).toBeInTheDocument());
-  });
+    it('renders order status badge', () => {
+      expect(screen.getAllByText('pending').length).toBeGreaterThan(0);
+    });
 
-  it('renders pagination controls', async () => {
-    setup();
-    render(<Orders />);
-    await waitFor(() => expect(screen.getByText(/Page 1/)).toBeInTheDocument());
-  });
-
-  it('renders order status badge', async () => {
-    setup();
-    render(<Orders />);
-    await waitFor(() => expect(screen.getByText('pending')).toBeInTheDocument());
+    it('opens Create Order dialog on button click', async () => {
+      fireEvent.click(screen.getAllByText('Create Order')[0]);
+      await waitFor(() => expect(screen.getByText('Select Customer')).toBeInTheDocument());
+    });
   });
 });

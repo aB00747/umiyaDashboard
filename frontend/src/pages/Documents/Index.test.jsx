@@ -12,7 +12,7 @@ import Documents from './Index';
 import { documentsAPI } from '../../api/documents';
 
 const DOCS = [
-  { id: 1, title: 'Invoice 001', category: 'invoice', file_url: 'http://file.pdf', uploaded_at: '2024-01-01', file_size: 1024 },
+  { id: 1, title: 'Invoice 001', category: 'invoice', file_url: 'https://example.com/file.pdf', uploaded_at: '2024-01-01', file_size: 1024 },
 ];
 
 describe('Documents', () => {

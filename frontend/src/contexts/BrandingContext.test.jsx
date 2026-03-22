@@ -38,12 +38,12 @@ describe('BrandingProvider', () => {
 
   it('loads branding from API when access token is present', async () => {
     brandingAPI.get.mockResolvedValue({
-      data: { system_name: 'Custom Co', logo_url: 'http://logo.png', favicon_url: '' },
+      data: { system_name: 'Custom Co', logo_url: 'https://example.com/logo.png', favicon_url: '' },
     });
     localStorage.setItem('access_token', 'tok');
     render(<BrandingProvider><Consumer /></BrandingProvider>);
     await waitFor(() => expect(screen.getByTestId('name').textContent).toBe('Custom Co'));
-    expect(screen.getByTestId('logo').textContent).toBe('http://logo.png');
+    expect(screen.getByTestId('logo').textContent).toBe('https://example.com/logo.png');
   });
 
   it('falls back to defaults when API fails', async () => {
@@ -65,7 +65,7 @@ describe('BrandingProvider', () => {
 
   it('injects favicon link tag when favicon URL is present', async () => {
     brandingAPI.get.mockResolvedValue({
-      data: { system_name: 'App', logo_url: '', favicon_url: 'http://fav.ico' },
+      data: { system_name: 'App', logo_url: '', favicon_url: 'https://example.com/fav.ico' },
     });
     localStorage.setItem('access_token', 'tok');
     render(<BrandingProvider><Consumer /></BrandingProvider>);

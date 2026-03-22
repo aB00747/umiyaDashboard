@@ -31,7 +31,7 @@ describe('SidebarContent', () => {
   });
 
   it('renders logo image when logoUrl provided', () => {
-    render$({ logoUrl: 'http://logo.png' });
+    render$({ logoUrl: 'https://example.com/logo.png' });
     expect(screen.getByAltText('Test App')).toBeInTheDocument();
   });
 

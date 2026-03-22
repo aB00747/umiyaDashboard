@@ -2,7 +2,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 
-
 vi.mock('../../api/reports', () => ({
   reportsAPI: { dashboard: vi.fn() },
 }));
@@ -15,7 +14,6 @@ vi.mock('../../contexts/BrandingContext', () => ({
   useBranding: () => ({ systemName: 'Test Dashboard' }),
 }));
 
-// Mock recharts to avoid SVG rendering issues in jsdom
 vi.mock('recharts', () => ({
   LineChart: ({ children }) => <div data-testid="line-chart">{children}</div>,
   Line: () => null,
@@ -54,9 +52,7 @@ const DASHBOARD_DATA = {
 };
 
 describe('Dashboard', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+  beforeEach(() => vi.clearAllMocks());
 
   it('shows loading spinner initially', () => {
     reportsAPI.dashboard.mockReturnValue(new Promise(() => {}));
@@ -70,57 +66,43 @@ describe('Dashboard', () => {
     await waitFor(() => expect(screen.getByText('Failed to load dashboard data')).toBeInTheDocument());
   });
 
-  it('renders system name from branding context', async () => {
-    reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
-    render(<Dashboard />);
-    await waitFor(() => expect(screen.getByText('Test Dashboard')).toBeInTheDocument());
-  });
+  describe('with loaded data', () => {
+    beforeEach(async () => {
+      reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
+      render(<Dashboard />);
+      await waitFor(() => screen.getByText('Total Revenue'));
+    });
 
-  it('renders stat cards after load', async () => {
-    reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
-    render(<Dashboard />);
-    await waitFor(() => expect(screen.getByText('Total Revenue')).toBeInTheDocument());
-    expect(screen.getByText('Total Orders')).toBeInTheDocument();
-    expect(screen.getByText('Total Customers')).toBeInTheDocument();
-    expect(screen.getByText('Low Stock Items')).toBeInTheDocument();
-  });
+    it('renders system name from branding context', () => {
+      expect(screen.getByText('Test Dashboard')).toBeInTheDocument();
+    });
 
-  it('renders stat values', async () => {
-    reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
-    render(<Dashboard />);
-    await waitFor(() => expect(screen.getByText('42')).toBeInTheDocument());
-    expect(screen.getByText('15')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
-  });
+    it('renders all stat card labels', () => {
+      expect(screen.getByText('Total Revenue')).toBeInTheDocument();
+      expect(screen.getByText('Total Orders')).toBeInTheDocument();
+      expect(screen.getByText('Total Customers')).toBeInTheDocument();
+      expect(screen.getByText('Low Stock Items')).toBeInTheDocument();
+    });
 
-  it('renders Monthly Overview chart section', async () => {
-    reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
-    render(<Dashboard />);
-    await waitFor(() => expect(screen.getByText('Monthly Overview')).toBeInTheDocument());
-  });
+    it('renders stat values', () => {
+      expect(screen.getByText('42')).toBeInTheDocument();
+      expect(screen.getByText('15')).toBeInTheDocument();
+      expect(screen.getByText('3')).toBeInTheDocument();
+    });
 
-  it('renders Order Status chart section', async () => {
-    reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
-    render(<Dashboard />);
-    await waitFor(() => expect(screen.getByText('Order Status')).toBeInTheDocument());
-  });
+    it('renders chart sections', () => {
+      expect(screen.getByText('Monthly Overview')).toBeInTheDocument();
+      expect(screen.getByText('Order Status')).toBeInTheDocument();
+    });
 
-  it('renders Recent Orders section', async () => {
-    reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
-    render(<Dashboard />);
-    await waitFor(() => expect(screen.getByText('Recent Orders')).toBeInTheDocument());
-  });
+    it('renders Recent Orders with order number', () => {
+      expect(screen.getByText('Recent Orders')).toBeInTheDocument();
+      expect(screen.getByText('ORD-001')).toBeInTheDocument();
+    });
 
-  it('renders order number in recent orders', async () => {
-    reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
-    render(<Dashboard />);
-    await waitFor(() => expect(screen.getByText('ORD-001')).toBeInTheDocument());
-  });
-
-  it('renders Low Stock Alerts section', async () => {
-    reportsAPI.dashboard.mockResolvedValue({ data: DASHBOARD_DATA });
-    render(<Dashboard />);
-    await waitFor(() => expect(screen.getByText('Low Stock Alerts')).toBeInTheDocument());
-    expect(screen.getByText('Chemical A')).toBeInTheDocument();
+    it('renders Low Stock Alerts with chemical name', () => {
+      expect(screen.getByText('Low Stock Alerts')).toBeInTheDocument();
+      expect(screen.getByText('Chemical A')).toBeInTheDocument();
+    });
   });
 });
