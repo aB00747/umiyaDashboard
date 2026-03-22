@@ -118,3 +118,138 @@ class LogoutViewTest(TestCase):
         self.client.force_authenticate(user=None)
         res = self.client.post(reverse('logout'))
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ProfileDeleteViewTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='delete_me', password=TEST_PASS)
+        self.client.force_authenticate(user=self.user)
+
+    def test_delete_profile(self):
+        res = self.client.delete(reverse('profile_delete'))
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(User.objects.filter(username='delete_me').exists())
+
+    def test_requires_auth(self):
+        self.client.force_authenticate(user=None)
+        self.assertEqual(self.client.delete(reverse('profile_delete')).status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class RegisterValidationTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = reverse('register')
+
+    def test_password_mismatch(self):
+        res = self.client.post(self.url, {
+            'username': 'mismatch', _PW_FIELD: TEST_PASS,
+            _PW_FIELD + '_confirmation': 'Different1!'
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_password_too_short(self):
+        res = self.client.post(self.url, {
+            'username': 'shortpw', _PW_FIELD: 'short',
+            _PW_FIELD + '_confirmation': 'short'
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class PermissionsTest(TestCase):
+    def setUp(self):
+        from apps.accounts.models import Role
+        from rest_framework.test import APIRequestFactory
+        self.factory = APIRequestFactory()
+        self.super_role = Role.objects.create(name='super_admin', label='Super Admin', level=4)
+        self.admin_role = Role.objects.create(name='admin', label='Admin', level=3)
+        self.member_role = Role.objects.create(name='member', label='Member', level=2)
+        self.staff_role = Role.objects.create(name='staff', label='Staff', level=1)
+
+    def _user_with_role(self, username, role):
+        user = User.objects.create_user(username=username, password=TEST_PASS)
+        user.role = role
+        user.save()
+        return user
+
+    def _request(self, user):
+        req = self.factory.get('/')
+        req.user = user
+        return req
+
+    def test_is_super_admin_passes(self):
+        from apps.accounts.permissions import IsSuperAdmin
+        user = self._user_with_role('sa_u', self.super_role)
+        self.assertTrue(IsSuperAdmin().has_permission(self._request(user), None))
+
+    def test_is_super_admin_fails_for_admin(self):
+        from apps.accounts.permissions import IsSuperAdmin
+        user = self._user_with_role('ad_u', self.admin_role)
+        self.assertFalse(IsSuperAdmin().has_permission(self._request(user), None))
+
+    def test_is_admin_or_above_passes(self):
+        from apps.accounts.permissions import IsAdminOrAbove
+        user = self._user_with_role('iao_u', self.admin_role)
+        self.assertTrue(IsAdminOrAbove().has_permission(self._request(user), None))
+
+    def test_is_admin_or_above_fails_for_member(self):
+        from apps.accounts.permissions import IsAdminOrAbove
+        user = self._user_with_role('mem_u', self.member_role)
+        self.assertFalse(IsAdminOrAbove().has_permission(self._request(user), None))
+
+    def test_is_member_or_above_passes(self):
+        from apps.accounts.permissions import IsMemberOrAbove
+        user = self._user_with_role('moa_u', self.member_role)
+        self.assertTrue(IsMemberOrAbove().has_permission(self._request(user), None))
+
+    def test_is_member_or_above_fails_no_role(self):
+        from apps.accounts.permissions import IsMemberOrAbove
+        user = User.objects.create_user(username='no_role', password=TEST_PASS)
+        self.assertFalse(IsMemberOrAbove().has_permission(self._request(user), None))
+
+
+class RoleViewSetTest(TestCase):
+    def setUp(self):
+        from apps.accounts.models import Role
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='role_viewer', password=TEST_PASS)
+        self.client.force_authenticate(user=self.user)
+        Role.objects.create(name='staff', label='Staff', level=1)
+        Role.objects.create(name='admin', label='Admin', level=3)
+
+    def test_list_roles(self):
+        res = self.client.get(reverse('roles-list'))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 2)
+
+    def test_requires_auth(self):
+        self.client.force_authenticate(user=None)
+        self.assertEqual(self.client.get(reverse('roles-list')).status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class UserManagementViewSetTest(TestCase):
+    def setUp(self):
+        from apps.accounts.models import Role
+        self.client = APIClient()
+        self.super_role = Role.objects.create(name='super_admin', label='Super Admin', level=4)
+        self.staff_role = Role.objects.create(name='staff', label='Staff', level=1)
+        self.admin_user = User.objects.create_user(username='super_adm', password=TEST_PASS)
+        self.admin_user.role = self.super_role
+        self.admin_user.save()
+        self.client.force_authenticate(user=self.admin_user)
+
+    def test_list_users(self):
+        res = self.client.get(reverse('user-management-list'))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_create_user(self):
+        res = self.client.post(reverse('user-management-list'), {
+            'username': 'newstaff', 'email': 'ns@test.com',
+            _PW_FIELD: TEST_PASS, 'role': self.staff_role.id, 'is_active': True
+        })
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    def test_requires_admin_role(self):
+        regular = User.objects.create_user(username='regu', password=TEST_PASS)
+        self.client.force_authenticate(user=regular)
+        self.assertEqual(self.client.get(reverse('user-management-list')).status_code, status.HTTP_403_FORBIDDEN)

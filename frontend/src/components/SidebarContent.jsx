@@ -2,6 +2,7 @@
 
 import PropTypes from 'prop-types';
 import { Link } from "react-router-dom";
+import { X } from 'lucide-react';
 import { classNames } from '../utils/format';
 
 export function SidebarContent({ currentPath, onClose, systemName, logoUrl, navItems }) {
