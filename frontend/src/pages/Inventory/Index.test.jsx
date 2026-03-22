@@ -17,11 +17,11 @@ const CHEMICALS = [
   { id: 1, chemical_name: 'Chemical X', chemical_code: 'CX01', category_name: 'Cat A', quantity: 50, unit: 'KG', min_quantity: 10, selling_price: 100, is_low_stock: false },
 ];
 
-function setup() {
-  chemicalsAPI.list.mockResolvedValue({ data: CHEMICALS });
-  categoriesAPI.list.mockResolvedValue({ data: [] });
-  vendorsAPI.list.mockResolvedValue({ data: [] });
-  stockEntriesAPI.list.mockResolvedValue({ data: [] });
+function setupAll({ chemicals = CHEMICALS, categories = [], vendors = [], stock = [] } = {}) {
+  chemicalsAPI.list.mockResolvedValue({ data: chemicals });
+  categoriesAPI.list.mockResolvedValue({ data: categories });
+  vendorsAPI.list.mockResolvedValue({ data: vendors });
+  stockEntriesAPI.list.mockResolvedValue({ data: stock });
 }
 
 describe('Inventory', () => {
@@ -36,28 +36,13 @@ describe('Inventory', () => {
     expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
-  it('renders Inventory heading after load', async () => {
-    setup();
-    render(<Inventory />);
-    await waitFor(() => expect(screen.getByText('Inventory')).toBeInTheDocument());
-  });
-
-  it('renders chemical rows when data loaded', async () => {
-    setup();
-    render(<Inventory />);
-    await waitFor(() => expect(screen.getByText('Chemical X')).toBeInTheDocument());
-  });
-
-  it('shows empty state when no chemicals', async () => {
-    chemicalsAPI.list.mockResolvedValue({ data: [] });
-    categoriesAPI.list.mockResolvedValue({ data: [] });
-    vendorsAPI.list.mockResolvedValue({ data: [] });
-    stockEntriesAPI.list.mockResolvedValue({ data: [] });
+  it('shows empty chemicals state', async () => {
+    setupAll({ chemicals: [] });
     render(<Inventory />);
     await waitFor(() => expect(screen.getByText(/No chemicals/i)).toBeInTheDocument());
   });
 
-  it('shows error toast when chemicals load fails', async () => {
+  it('shows error toast when load fails', async () => {
     const toast = (await import('react-hot-toast')).default;
     chemicalsAPI.list.mockRejectedValue(new Error('fail'));
     categoriesAPI.list.mockResolvedValue({ data: [] });
@@ -67,75 +52,70 @@ describe('Inventory', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalled());
   });
 
-  it('renders tab navigation', async () => {
-    setup();
-    render(<Inventory />);
-    await waitFor(() => expect(screen.getByText('Chemicals')).toBeInTheDocument());
+  describe('with loaded data', () => {
+    beforeEach(async () => {
+      setupAll();
+      render(<Inventory />);
+      await waitFor(() => screen.getByText('Inventory'));
+    });
+
+    it('renders heading, chemical rows and tab navigation', () => {
+      expect(screen.getByText('Inventory')).toBeInTheDocument();
+      expect(screen.getByText('Chemical X')).toBeInTheDocument();
+      expect(screen.getByText('Chemicals')).toBeInTheDocument();
+    });
+
+    it('opens Add Chemical dialog', async () => {
+      fireEvent.click(screen.getByText(/Add chemical/i));
+      await waitFor(() => expect(screen.getAllByText(/Add chemical/i).length).toBeGreaterThan(1));
+    });
+
+    describe('Categories tab', () => {
+      beforeEach(() => fireEvent.click(screen.getByText('Categories')));
+
+      it('shows empty state', async () => {
+        await waitFor(() => expect(screen.getByText(/No categories/i)).toBeInTheDocument());
+      });
+    });
+
+    describe('Vendors tab', () => {
+      beforeEach(() => fireEvent.click(screen.getByText('Vendors')));
+
+      it('shows empty state', async () => {
+        await waitFor(() => expect(screen.getByText(/No vendors/i)).toBeInTheDocument());
+      });
+    });
+
+    describe('Stock Entries tab', () => {
+      beforeEach(() => fireEvent.click(screen.getByText('Stock Entries')));
+
+      it('shows empty state', async () => {
+        await waitFor(() => expect(screen.getByText(/No stock entries/i)).toBeInTheDocument());
+      });
+    });
   });
 
-  it('switches to Categories tab', async () => {
-    chemicalsAPI.list.mockResolvedValue({ data: CHEMICALS });
-    categoriesAPI.list.mockResolvedValue({ data: [{ id: 1, name: 'Cat A', description: 'desc' }] });
-    vendorsAPI.list.mockResolvedValue({ data: [] });
-    stockEntriesAPI.list.mockResolvedValue({ data: [] });
+  it('shows category data in Categories tab', async () => {
+    setupAll({ categories: [{ id: 1, name: 'Cat A', description: 'desc' }] });
     render(<Inventory />);
     await waitFor(() => screen.getByText('Categories'));
     fireEvent.click(screen.getByText('Categories'));
     await waitFor(() => expect(screen.getByText('Cat A')).toBeInTheDocument());
   });
 
-  it('shows empty state in Categories tab', async () => {
-    setup();
-    render(<Inventory />);
-    await waitFor(() => screen.getByText('Categories'));
-    fireEvent.click(screen.getByText('Categories'));
-    await waitFor(() => expect(screen.getByText(/No categories/i)).toBeInTheDocument());
-  });
-
-  it('switches to Vendors tab', async () => {
-    chemicalsAPI.list.mockResolvedValue({ data: CHEMICALS });
-    categoriesAPI.list.mockResolvedValue({ data: [] });
-    vendorsAPI.list.mockResolvedValue({ data: [{ id: 1, vendor_name: 'Vendor X', contact_person: 'John', phone: '1234', gstin: 'GS01' }] });
-    stockEntriesAPI.list.mockResolvedValue({ data: [] });
+  it('shows vendor data in Vendors tab', async () => {
+    setupAll({ vendors: [{ id: 1, vendor_name: 'Vendor X', contact_person: 'John', phone: '1234', gstin: 'GS01' }] });
     render(<Inventory />);
     await waitFor(() => screen.getByText('Vendors'));
     fireEvent.click(screen.getByText('Vendors'));
     await waitFor(() => expect(screen.getByText('Vendor X')).toBeInTheDocument());
   });
 
-  it('shows empty state in Vendors tab', async () => {
-    setup();
-    render(<Inventory />);
-    await waitFor(() => screen.getByText('Vendors'));
-    fireEvent.click(screen.getByText('Vendors'));
-    await waitFor(() => expect(screen.getByText(/No vendors/i)).toBeInTheDocument());
-  });
-
-  it('switches to Stock Entries tab', async () => {
-    chemicalsAPI.list.mockResolvedValue({ data: CHEMICALS });
-    categoriesAPI.list.mockResolvedValue({ data: [] });
-    vendorsAPI.list.mockResolvedValue({ data: [] });
-    stockEntriesAPI.list.mockResolvedValue({ data: [{ id: 1, chemical_name: 'Chemical X', entry_type: 'purchase', quantity: 10, unit: 'KG', rate: 100, total_value: 1000, created_at: '2024-01-01', vendor_name: 'V1', reference_note: '' }] });
+  it('shows stock entry data in Stock Entries tab', async () => {
+    setupAll({ stock: [{ id: 1, chemical_name: 'Chemical X', entry_type: 'purchase', quantity: 10, unit: 'KG', rate: 100, total_value: 1000, created_at: '2024-01-01', vendor_name: 'V1', reference_note: '' }] });
     render(<Inventory />);
     await waitFor(() => screen.getByText('Stock Entries'));
     fireEvent.click(screen.getByText('Stock Entries'));
     await waitFor(() => expect(screen.getByText(/Chemical X/)).toBeInTheDocument());
-  });
-
-  it('shows empty state in Stock Entries tab', async () => {
-    setup();
-    render(<Inventory />);
-    await waitFor(() => screen.getByText('Stock Entries'));
-    fireEvent.click(screen.getByText('Stock Entries'));
-    await waitFor(() => expect(screen.getByText(/No stock entries/i)).toBeInTheDocument());
-  });
-
-  it('opens Add Chemical dialog', async () => {
-    setup();
-    render(<Inventory />);
-    await waitFor(() => screen.getByText('Chemicals'));
-    const addBtn = screen.getByText(/Add chemical/i);
-    fireEvent.click(addBtn);
-    await waitFor(() => expect(screen.getAllByText(/Add chemical/i).length).toBeGreaterThan(1));
   });
 });

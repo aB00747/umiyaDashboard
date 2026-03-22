@@ -14,19 +14,10 @@ vi.mock('../../contexts/BrandingContext', () => ({
   useBranding: () => ({ systemName: 'Test Dashboard' }),
 }));
 
-vi.mock('recharts', () => ({
-  LineChart: ({ children }) => <div data-testid="line-chart">{children}</div>,
-  Line: () => null,
-  XAxis: () => null,
-  YAxis: () => null,
-  CartesianGrid: () => null,
-  Tooltip: () => null,
-  Legend: () => null,
-  ResponsiveContainer: ({ children }) => <div>{children}</div>,
-  PieChart: ({ children }) => <div data-testid="pie-chart">{children}</div>,
-  Pie: ({ children }) => <div>{children}</div>,
-  Cell: () => null,
-}));
+vi.mock('recharts', () => {
+  const stub = () => null;
+  return { LineChart: stub, Line: stub, XAxis: stub, YAxis: stub, CartesianGrid: stub, Tooltip: stub, Legend: stub, ResponsiveContainer: stub, PieChart: stub, Pie: stub, Cell: stub };
+});
 
 import Dashboard from './Index';
 import { reportsAPI } from '../../api/reports';
