@@ -1,9 +1,16 @@
+import logging
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .services import ai_client, AIServiceUnavailable, AIServiceError
 from .serializers import ChatRequestSerializer, InsightRequestSerializer, DocumentProcessSerializer
+
+logger = logging.getLogger(__name__)
+
+AI_UNAVAILABLE = {'detail': 'AI service is not available. Please try again later.'}
+AI_ERROR = {'detail': 'An error occurred while processing your request.'}
 
 
 @api_view(['GET'])
@@ -33,15 +40,10 @@ def ai_chat_view(request):
         )
         return Response(data)
     except AIServiceUnavailable:
-        return Response(
-            {'detail': 'AI service is not available. Please try again later.'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        )
+        return Response(AI_UNAVAILABLE, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except AIServiceError as e:
-        return Response(
-            {'detail': str(e)},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
+        logger.error('AI chat error surfaced to view: %s', e)
+        return Response(AI_ERROR, status=status.HTTP_502_BAD_GATEWAY)
 
 
 @api_view(['GET'])
@@ -51,42 +53,36 @@ def ai_conversations_view(request):
         data = ai_client.list_conversations(request.user.id)
         return Response(data)
     except AIServiceUnavailable:
-        return Response(
-            {'detail': 'AI service is not available'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        )
+        return Response(AI_UNAVAILABLE, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except AIServiceError as e:
-        return Response({'detail': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        logger.error('AI list conversations error surfaced to view: %s', e)
+        return Response(AI_ERROR, status=status.HTTP_502_BAD_GATEWAY)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def ai_conversation_messages_view(request, conversation_id):
     try:
-        data = ai_client.get_conversation_messages(conversation_id)
+        data = ai_client.get_conversation_messages(conversation_id, user_id=request.user.id)
         return Response(data)
     except AIServiceUnavailable:
-        return Response(
-            {'detail': 'AI service is not available'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        )
+        return Response(AI_UNAVAILABLE, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except AIServiceError as e:
-        return Response({'detail': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        logger.error('AI get messages error surfaced to view: %s', e)
+        return Response(AI_ERROR, status=status.HTTP_502_BAD_GATEWAY)
 
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def ai_conversation_delete_view(request, conversation_id):
     try:
-        data = ai_client.delete_conversation(conversation_id)
+        data = ai_client.delete_conversation(conversation_id, user_id=request.user.id)
         return Response(data)
     except AIServiceUnavailable:
-        return Response(
-            {'detail': 'AI service is not available'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        )
+        return Response(AI_UNAVAILABLE, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except AIServiceError as e:
-        return Response({'detail': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        logger.error('AI delete conversation error surfaced to view: %s', e)
+        return Response(AI_ERROR, status=status.HTTP_502_BAD_GATEWAY)
 
 
 @api_view(['POST'])
@@ -101,12 +97,10 @@ def ai_insight_view(request):
         )
         return Response(data)
     except AIServiceUnavailable:
-        return Response(
-            {'detail': 'AI service is not available'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        )
+        return Response(AI_UNAVAILABLE, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except AIServiceError as e:
-        return Response({'detail': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        logger.error('AI insight error surfaced to view: %s', e)
+        return Response(AI_ERROR, status=status.HTTP_502_BAD_GATEWAY)
 
 
 @api_view(['GET'])
@@ -116,12 +110,10 @@ def ai_quick_insights_view(request):
         data = ai_client.quick_insights()
         return Response(data)
     except AIServiceUnavailable:
-        return Response(
-            {'detail': 'AI service is not available'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        )
+        return Response(AI_UNAVAILABLE, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except AIServiceError as e:
-        return Response({'detail': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        logger.error('AI quick insights error surfaced to view: %s', e)
+        return Response(AI_ERROR, status=status.HTTP_502_BAD_GATEWAY)
 
 
 @api_view(['POST'])
@@ -138,9 +130,7 @@ def ai_process_document_view(request):
         )
         return Response(data)
     except AIServiceUnavailable:
-        return Response(
-            {'detail': 'AI service is not available'},
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        )
+        return Response(AI_UNAVAILABLE, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except AIServiceError as e:
-        return Response({'detail': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        logger.error('AI document processing error surfaced to view: %s', e)
+        return Response(AI_ERROR, status=status.HTTP_502_BAD_GATEWAY)

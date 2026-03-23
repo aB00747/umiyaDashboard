@@ -90,11 +90,12 @@ class AIServiceClient:
             logger.error(f'AI list conversations error: {e}')
             raise AIServiceError(str(e))
 
-    def get_conversation_messages(self, conversation_id):
+    def get_conversation_messages(self, conversation_id, user_id):
         try:
             with httpx.Client(timeout=10) as client:
                 resp = client.get(
                     f'{self.base_url}/chat/conversations/{conversation_id}/messages/',
+                    params={'user_id': user_id},
                     headers=self._headers(),
                 )
                 return self._handle_response(resp)
@@ -106,11 +107,12 @@ class AIServiceClient:
             logger.error(f'AI get messages error: {e}')
             raise AIServiceError(str(e))
 
-    def delete_conversation(self, conversation_id):
+    def delete_conversation(self, conversation_id, user_id):
         try:
             with httpx.Client(timeout=10) as client:
                 resp = client.delete(
                     f'{self.base_url}/chat/conversations/{conversation_id}/',
+                    params={'user_id': user_id},
                     headers=self._headers(),
                 )
                 return self._handle_response(resp)
